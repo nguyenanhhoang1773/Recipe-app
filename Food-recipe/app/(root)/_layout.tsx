@@ -15,9 +15,8 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Home
             </Text>
@@ -37,11 +36,10 @@ const RootLayout = () => {
           title: "My Favorite",
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
-              Save
+              Favorite
             </Text>
           ),
           tabBarIcon: ({ focused }) => (
@@ -54,13 +52,32 @@ const RootLayout = () => {
         }}
       />
       <Tabs.Screen
+        name="Scan"
+        options={{
+          title: "My Scan",
+          tabBarLabel: ({ focused }) => (
+            <Text
+              className={`${focused ? "text-primary" : "text-text-primary"} font-Inter-SemiBold`}
+            >
+              Scan
+            </Text>
+          ),
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              color={focused ? colors.primary : colors["text-primary"]}
+              size={22}
+              name={focused ? "camera-reverse-outline" : "camera"} // Thay đổi thành "camera"
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="Explore"
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Explore
             </Text>
@@ -79,9 +96,8 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Profile
             </Text>
@@ -95,6 +111,7 @@ const RootLayout = () => {
           ),
         }}
       />
+
     </Tabs>
   );
 };
