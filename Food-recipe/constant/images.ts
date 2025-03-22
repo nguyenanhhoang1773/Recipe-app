@@ -8,6 +8,8 @@ import pancake from "@/assets/images/pancake.jpg";
 import saladTrung from "@/assets/images/saladTrung.jpg";
 import ingredients from "@/assets/images/ingredients.png";
 import clock from "@/assets/images/clock.png";
+import vegetable from "@/assets/images/rausach.jpg";
+import andanh from "@/assets/images/andanh.jpg";
 export default {
   thumbnail1,
   salad,
@@ -19,4 +21,6 @@ export default {
   saladTrung,
   ingredients,
   clock,
+  vegetable,
+  andanh
 };
