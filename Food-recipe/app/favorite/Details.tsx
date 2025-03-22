@@ -21,7 +21,7 @@ export default function Details() {
     const ingredients = item.ingredients.split(';');
     const instructions = item.instructions.split(';');
 
-    const videotest = require('./nauan.mp4');
+    const videotest = require('./0323.mp4');
     const player = useVideoPlayer(videotest, (player) => {
         player.loop = true;
         player.showNowPlayingNotification = false;
