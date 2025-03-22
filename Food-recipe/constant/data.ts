@@ -18,6 +18,7 @@ const recipe = [
     source: images.pancake,
   },
 ];
+
 export default {
   recipe,
 };

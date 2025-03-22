@@ -128,7 +128,7 @@ const Home = () => {
               source={images.cookie}
             />
           </View>
-          <FlatList
+          <FlatList 
             data={data.recipe}
             className="mt-5 pb-5"
             contentContainerClassName="px-7"
