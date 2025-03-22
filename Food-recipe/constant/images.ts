@@ -10,6 +10,11 @@ import saladTrung from "@/assets/images/saladTrung.jpg";
 import ingredients from "@/assets/images/ingredients.png";
 import clock from "@/assets/images/clock.png";
 import logo from "@/assets/images/react-logo.png"
+import egg from "@/assets/images/egg.jpg"
+import rau from "@/assets/images/rau.jpg"
+import cachua from "@/assets/images/cachua.jpg"
+import cheese from "@/assets/images/cheese.jpg"
+
 export default {
   thumbnail1,
   thumbnail,
@@ -23,4 +28,9 @@ export default {
   ingredients,
   clock,
   logo,
+  egg,
+  rau,
+  cachua,
+  cheese
+
 };
