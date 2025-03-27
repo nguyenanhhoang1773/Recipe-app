@@ -8,6 +8,8 @@ import pancake from "@/assets/images/pancake.jpg";
 import saladTrung from "@/assets/images/saladTrung.jpg";
 import ingredients from "@/assets/images/ingredients.png";
 import clock from "@/assets/images/clock.png";
+import wallpaper from "@/assets/images/wallpaper.jpg";
+import google from "@/assets/images/google.png";
 export default {
   thumbnail1,
   salad,
@@ -19,4 +21,6 @@ export default {
   saladTrung,
   ingredients,
   clock,
+  wallpaper,
+  google,
 };

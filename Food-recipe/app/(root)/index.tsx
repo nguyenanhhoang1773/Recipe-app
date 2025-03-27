@@ -18,9 +18,11 @@ import images from "@/constant/images";
 import ItemCate from "@/components/ItemCate";
 import data from "@/constant/data";
 import { LinearGradient } from "expo-linear-gradient";
+import { Redirect } from "expo-router";
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 const Home = () => {
+  return <Redirect href={"/(auth)/sign-in"} />;
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
