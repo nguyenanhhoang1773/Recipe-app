@@ -22,7 +22,6 @@ import { Redirect } from "expo-router";
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 const Home = () => {
-  return <Redirect href={"/(auth)/sign-in"} />;
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -130,7 +129,7 @@ const Home = () => {
               source={images.cookie}
             />
           </View>
-          <FlatList 
+          <FlatList
             data={data.recipe}
             className="mt-5 pb-5"
             contentContainerClassName="px-7"
