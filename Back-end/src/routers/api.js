@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Detail = require('../controllers/detail');
+const getLiked = require('../controllers/Liked/Liked.js');
 
 
 
 
-router.get('/test', Detail);
+router.get('/liked', getLiked);
 
 
 module.exports = router;
