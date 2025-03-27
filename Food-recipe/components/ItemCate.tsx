@@ -21,7 +21,12 @@ const ItemCate = ({
           className="w-full h-full"
         />
       </TouchableOpacity>
-      <Text className="font-Inter-Medium text-base">{title}</Text>
+      <Text
+        numberOfLines={1}
+        className="font-Inter-Medium text-base"
+      >
+        {title}
+      </Text>
     </View>
   );
 };

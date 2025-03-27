@@ -9,6 +9,8 @@ import pancake from "@/assets/images/pancake.jpg";
 import saladTrung from "@/assets/images/saladTrung.jpg";
 import ingredients from "@/assets/images/ingredients.png";
 import clock from "@/assets/images/clock.png";
+import wallpaper from "@/assets/images/wallpaper.jpg";
+import google from "@/assets/images/google.png";
 
 import vegetable from "@/assets/images/rausach.jpg";
 import andanh from "@/assets/images/andanh.jpg";
@@ -30,11 +32,13 @@ export default {
   saladTrung,
   ingredients,
   clock,
+  wallpaper,
+  google,
   vegetable,
   andanh,
   logo,
   egg,
   rau,
   cachua,
-  cheese
+  cheese,
 };

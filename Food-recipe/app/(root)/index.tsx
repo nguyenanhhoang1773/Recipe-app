@@ -18,6 +18,7 @@ import images from "@/constant/images";
 import ItemCate from "@/components/ItemCate";
 import data from "@/constant/data";
 import { LinearGradient } from "expo-linear-gradient";
+import { Redirect } from "expo-router";
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 const Home = () => {
@@ -128,7 +129,7 @@ const Home = () => {
               source={images.cookie}
             />
           </View>
-          <FlatList 
+          <FlatList
             data={data.recipe}
             className="mt-5 pb-5"
             contentContainerClassName="px-7"
