@@ -1,11 +1,10 @@
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
+import Index from "../favorite/index"
 import React from "react";
 
 const Favorite = () => {
   return (
-    <View>
-      <Text>Favorite</Text>
-    </View>
+    <Index />  
   );
 };
 
