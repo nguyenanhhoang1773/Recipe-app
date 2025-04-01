@@ -65,7 +65,10 @@ const SignIn = () => {
         <Text className="font-Inter-SemiBold text-2xl text-center">
           Sign in to your account!
         </Text>
-        <TouchableOpacity className="flex-row items-center justify-center bg-[rgba(0,0,0,0.05)] rounded-xl py-4  mt-6">
+        <TouchableOpacity
+          onPress={onPress}
+          className="flex-row items-center justify-center bg-[rgba(0,0,0,0.05)] rounded-xl py-4  mt-6"
+        >
           <Image
             className="w-6 h-6"
             source={images.google}
@@ -76,11 +79,11 @@ const SignIn = () => {
         </TouchableOpacity>
         <TouchableOpacity className="mt-2 flex-row justify-center bg-[rgba(0,0,0,0.05)] rounded-xl py-4  items-center">
           <Image
-            className="w-6 h-6"
-            source={images.google}
+            className="w-6 h-6 scale-125"
+            source={images.github}
           />
           <Text className="ml-2 font-Inter-SemiBold text-xl">
-            Sign in with Google
+            Sign in with Github
           </Text>
         </TouchableOpacity>
         <View className="flex-row justify-center items-center py-2 mt-4">
@@ -103,20 +106,7 @@ const SignIn = () => {
             Forgot password?
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={onPress}
-          className="bg-slate-950 py-5 rounded-xl mt-2"
-        >
-          <Text className="text-white text-center text-xl font-Inter-SemiBold">
-            Continue
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            signOut();
-          }}
-          className="bg-slate-950 py-5 rounded-xl mt-2"
-        >
+        <TouchableOpacity className="bg-slate-950 py-5 rounded-xl mt-2">
           <Text className="text-white text-center text-xl font-Inter-SemiBold">
             Continue
           </Text>
