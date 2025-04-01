@@ -19,8 +19,10 @@ import egg from "@/assets/images/egg.jpg";
 import rau from "@/assets/images/rau.jpg";
 import cachua from "@/assets/images/cachua.jpg";
 import cheese from "@/assets/images/cheese.jpg";
+import logoLogIn from "@/assets/images/logo.png";
 
 export default {
+  logoLogIn,
   thumbnail1,
   thumbnail,
   salad,
