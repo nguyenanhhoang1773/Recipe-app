@@ -3,7 +3,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "@/global.css";
-import { ClerkProvider } from "@clerk/clerk-expo";
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/cache";
 
 SplashScreen.preventAutoHideAsync();
@@ -35,7 +35,9 @@ export default function RootLayout() {
       publishableKey={publishableKey}
       tokenCache={tokenCache}
     >
-      <Stack screenOptions={{ headerShown: false }} />;
+      <ClerkLoaded>
+        <Stack screenOptions={{ headerShown: false }} />;
+      </ClerkLoaded>
     </ClerkProvider>
   );
 }

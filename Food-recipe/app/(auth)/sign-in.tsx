@@ -26,7 +26,6 @@ export const useWarmUpBrowser = () => {
 WebBrowser.maybeCompleteAuthSession();
 const SignIn = () => {
   useWarmUpBrowser();
-  const { user } = useUser();
   const { signOut } = useClerk();
   const { startSSOFlow } = useSSO();
   const widthWindow = Dimensions.get("window").width;
@@ -37,6 +36,7 @@ const SignIn = () => {
           strategy: "oauth_google",
           redirectUrl: AuthSession.makeRedirectUri(),
         });
+      console.log("exp://192.168.110.240:8081");
 
       if (createdSessionId) {
         setActive!({ session: createdSessionId });
