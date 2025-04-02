@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import "@/global.css";
 import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/cache";
-
 SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;

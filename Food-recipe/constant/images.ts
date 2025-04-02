@@ -21,8 +21,10 @@ import cachua from "@/assets/images/cachua.jpg";
 import cheese from "@/assets/images/cheese.jpg";
 import logoLogIn from "@/assets/images/logo.png";
 import github from "@/assets/images/github.png";
+import banhmi from "@/assets/images/banhmi.jpg";
 
 export default {
+  banhmi,
   github,
   logoLogIn,
   thumbnail1,

@@ -36,7 +36,6 @@ const SignIn = () => {
           strategy: "oauth_google",
           redirectUrl: AuthSession.makeRedirectUri(),
         });
-      console.log("exp://192.168.110.240:8081");
 
       if (createdSessionId) {
         setActive!({ session: createdSessionId });

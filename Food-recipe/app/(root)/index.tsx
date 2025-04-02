@@ -100,7 +100,7 @@ const Home = () => {
               <View className="bg-text-primary h-8 w-[1px]"></View>
               <TouchableOpacity className="p-4">
                 <FontAwesome6
-                  size={24}
+                  size={20}
                   name="sliders"
                 />
               </TouchableOpacity>
@@ -108,25 +108,35 @@ const Home = () => {
           </View>
           <View className="px-7 flex-row items-center mt-5">
             <ItemCate
+              inHome
               isFirst
               title="Bữa sáng"
               source={images.breakfast}
+              type="Breakfast"
             />
             <ItemCate
+              inHome
               title="Món chính"
               source={images.chicken}
+              type="MainCourse"
             />
             <ItemCate
+              inHome
               title="Món nước"
               source={images.pho}
+              type="Noodle"
             />
             <ItemCate
+              inHome
               title="Salad"
               source={images.salad}
+              type="Vegetable"
             />
             <ItemCate
+              inHome
               title="Đồ ngọt"
               source={images.cookie}
+              type="Sweets"
             />
           </View>
           <FlatList
@@ -164,7 +174,7 @@ const Home = () => {
                     {item.type}
                   </Text>
                 </View>
-                <View className="absolute bottom-4 right-0 left-4 ">
+                <View className="absolute bottom-4 right-4 left-4 ">
                   <Text
                     numberOfLines={1}
                     className="text-white font-Inter-Medium text-2xl"

@@ -8,7 +8,11 @@ import {
 } from "@expo/vector-icons";
 import colors from "@/constant/colors";
 import { useClerk, useUser } from "@clerk/clerk-expo";
+import { usePathname } from "expo-router";
+
 const RootLayout = () => {
+  const path = usePathname();
+  console.log(path);
   const { user } = useUser();
   if (!user) return <Redirect href={"/(auth)/sign-in"} />;
   return (
