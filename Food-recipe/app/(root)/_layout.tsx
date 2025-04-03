@@ -1,13 +1,20 @@
 import { View, Text } from "react-native";
 import React from "react";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import {
   Ionicons,
   AntDesign,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import colors from "@/constant/colors";
+import { useClerk, useUser } from "@clerk/clerk-expo";
+import { usePathname } from "expo-router";
+
 const RootLayout = () => {
+  const path = usePathname();
+  console.log(path);
+  const { user } = useUser();
+  if (!user) return <Redirect href={"/(auth)/sign-in"} />;
   return (
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
@@ -15,8 +22,9 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${focused ? "text-primary" : "text-text-primary"
-                } font-Inter-SemiBold`}
+              className={`${
+                focused ? "text-primary" : "text-text-primary"
+              } font-Inter-SemiBold`}
             >
               Home
             </Text>
@@ -36,8 +44,9 @@ const RootLayout = () => {
           title: "My Favorite",
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${focused ? "text-primary" : "text-text-primary"
-                } font-Inter-SemiBold`}
+              className={`${
+                focused ? "text-primary" : "text-text-primary"
+              } font-Inter-SemiBold`}
             >
               Favorite
             </Text>
@@ -57,7 +66,9 @@ const RootLayout = () => {
           title: "My Scan",
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${focused ? "text-primary" : "text-text-primary"} font-Inter-SemiBold`}
+              className={`${
+                focused ? "text-primary" : "text-text-primary"
+              } font-Inter-SemiBold`}
             >
               Scan
             </Text>
@@ -76,8 +87,9 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${focused ? "text-primary" : "text-text-primary"
-                } font-Inter-SemiBold`}
+              className={`${
+                focused ? "text-primary" : "text-text-primary"
+              } font-Inter-SemiBold`}
             >
               Explore
             </Text>
@@ -96,8 +108,9 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${focused ? "text-primary" : "text-text-primary"
-                } font-Inter-SemiBold`}
+              className={`${
+                focused ? "text-primary" : "text-text-primary"
+              } font-Inter-SemiBold`}
             >
               Profile
             </Text>
@@ -111,7 +124,6 @@ const RootLayout = () => {
           ),
         }}
       />
-
     </Tabs>
   );
 };
