@@ -1,11 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const getLiked = require('../controllers/Liked/Liked.js');
+const { getLiked, addLiked, unLiked } = require('../controllers/Liked/Liked.js');
+const { getFeedback, addFeedback } = require('../controllers/Feedback/Feedback.js');
+const searchItems = require('../controllers/Search/Search.js');
 
 
 
+// router liked
+router.get('/liked/:id_user', getLiked);
+router.post('/addLiked', addLiked);
+router.delete('/unLiked', unLiked);
 
-router.get('/liked', getLiked);
 
+// router feedback
+router.post('/getFeedback', getFeedback);
+router.post('/addFeedback', addFeedback);
+
+//router Search
+router.post('/search', searchItems)
 
 module.exports = router;
