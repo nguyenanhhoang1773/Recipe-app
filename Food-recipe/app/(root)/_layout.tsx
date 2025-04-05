@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Redirect, Tabs } from "expo-router";
 import {
   Ionicons,
@@ -9,11 +9,29 @@ import {
 import colors from "@/constant/colors";
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import { usePathname } from "expo-router";
+import axios from "axios";
 
+const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 const RootLayout = () => {
   const path = usePathname();
-  console.log(path);
   const { user } = useUser();
+  useEffect(() => {
+    axios
+      .post(`${hostId}:80/api/login`, {
+        id_user: user?.id,
+        name: user?.fullName,
+        image_url: user?.imageUrl,
+        email: user?.emailAddresses[0].emailAddress,
+        favorites: [],
+        recentlyLogin: user?.createdAt,
+      })
+      .then(function (response) {
+        console.log("Đăng nhập thành công tài khoản:", response.data.email);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, [user]);
   if (!user) return <Redirect href={"/(auth)/sign-in"} />;
   return (
     <Tabs screenOptions={{ headerShown: false }}>

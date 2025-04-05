@@ -1,11 +1,10 @@
 const express = require("express");
 const app = express();
-require("dotenv").config();
 const mongoose = require("mongoose");
 var cors = require("cors");
-app.use(cors());
-
 const router = require("./routers/api.js");
+require("dotenv").config();
+app.use(cors());
 const port = process.env.PORT || 80;
 const mongodb = process.env.MONGODB_URL || "";
 const hostname = process.env.HOST_NAME || "localhost";
@@ -16,10 +15,11 @@ async function connect() {
     console.log("connect thành công");
   } catch (error) {
     console.log("connect không thành công");
-    console.log(error);
   }
 }
 connect();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 app.use("/api", router);
 
