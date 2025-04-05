@@ -8,7 +8,7 @@ import {
   Dimensions,
   ScrollView,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import ItemCate from "@/components/ItemCate";
 import images from "@/constant/images";
@@ -22,6 +22,7 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 const Category = () => {
   const { user } = useUser();
+
   return (
     <SafeAreaView>
       <ScrollView className="px-7 pt-5">
@@ -181,6 +182,7 @@ const Category = () => {
               className={`${index && "ml-3"} w-full`}
             >
               <Image
+                onLoad={() => console.log(item.title)}
                 className="w-full h-full rounded-3xl"
                 source={item.source}
               />
