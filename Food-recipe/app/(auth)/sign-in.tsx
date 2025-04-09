@@ -13,7 +13,6 @@ import * as WebBrowser from "expo-web-browser";
 import * as AuthSession from "expo-auth-session";
 import { useSSO } from "@clerk/clerk-expo";
 import { useClerk, useUser } from "@clerk/clerk-expo";
-
 export const useWarmUpBrowser = () => {
   useEffect(() => {
     void WebBrowser.warmUpAsync();
@@ -26,6 +25,7 @@ export const useWarmUpBrowser = () => {
 WebBrowser.maybeCompleteAuthSession();
 const SignIn = () => {
   useWarmUpBrowser();
+  const { user } = useUser();
   const { signOut } = useClerk();
   const { startSSOFlow } = useSSO();
   const widthWindow = Dimensions.get("window").width;
