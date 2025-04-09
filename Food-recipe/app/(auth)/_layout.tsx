@@ -8,3 +8,4 @@ const AuthLayout = () => {
   return <Slot />;
 };
 export default AuthLayout;
+  

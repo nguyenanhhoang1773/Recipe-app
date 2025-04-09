@@ -9,10 +9,12 @@ import {
 import images from "@/constant/images";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import data from "@/constant/data";
-import React, { useLayoutEffect } from "react";
+import { Modal, TextInput } from "react-native";
+import React, { useLayoutEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useUser, useClerk } from "@clerk/clerk-expo";
+import * as ImagePicker from "expo-image-picker";
 type TabParamList = {
   Profile: undefined;
   Favorite: undefined;
@@ -24,17 +26,93 @@ const Profile = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigation = useNavigation<NativeStackNavigationProp<TabParamList>>();
+  const [bio, setBio] = useState(""); 
+  const [modalVisible, setModalVisible] = useState(false); 
+  const [editingBio, setEditingBio] = useState(""); 
+
 
   useLayoutEffect(() => {
     navigation.setOptions({ animation: "slide_from_right" });
   }, [navigation]);
 
+  const handleSettingsPress = () => {
+    Alert.alert(
+      "Cài đặt hồ sơ",
+      "Bạn muốn thực hiện thao tác gì?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+        {
+          text: "Thay đổi ảnh đại diện",
+          onPress: async () => {
+            Alert.alert("Chọn ảnh", "Bạn muốn thực hiện thao tác nào?", [
+              {
+                text: "Chụp ảnh",
+                onPress: async () => {
+                  const permission = await ImagePicker.requestCameraPermissionsAsync();
+                  if (!permission.granted) return;
+        
+                  const result = await ImagePicker.launchCameraAsync({
+                    allowsEditing: true,
+                    aspect: [1, 1],
+                    quality: 1,
+                  });
+        
+                  if (!result.canceled) {
+                    const uri = result.assets[0].uri;
+                    console.log("Ảnh chụp:", uri);
+                  }
+                },
+              },
+              {
+                text: "Chọn từ thư viện",
+                onPress: async () => {
+                  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                  if (!permission.granted) return;
+        
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    allowsEditing: true,
+                    aspect: [1, 1],
+                    quality: 1,
+                  });
+        
+                  if (!result.canceled) {
+                    const uri = result.assets[0].uri;
+                    console.log("Ảnh đã chọn:", uri);
+                  }
+                },
+              },
+              {
+                text: "Hủy",
+                style: "cancel",
+              },
+            ]);
+          },
+        },        
+        {
+          text: "Thêm giới thiệu hồ sơ",
+          onPress: handleAddBio,
+        },
+        
+      ],
+      { cancelable: true }
+    );
+  };
+  const handleAddBio = () => {
+    setEditingBio(bio); 
+    setModalVisible(true);
+  };  
+  
   const handleLogOut = () => {
     Alert.alert("Thông báo!", "Bạn có chắc chắn muốn đăng xuất không?", [
       { text: "Hủy", style: "cancel" },
       { text: "Đăng xuất", onPress: () => signOut() },
     ]);
   };
+
+  const [avatar, setAvatar] = useState<string | null>(null);
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -53,6 +131,7 @@ const Profile = () => {
           <View className="flex-row justify-between items-center px-6 pt-6">
             <Text className="text-2xl font-semibold">My profile</Text>
             <MaterialIcons
+              onPress={handleSettingsPress}
               name="settings"
               size={24}
               color="black"
@@ -67,7 +146,7 @@ const Profile = () => {
         style={{ top: 100 }}
       >
         <Image
-          source={{ uri: user?.imageUrl }}
+          source={{ uri: avatar || user?.imageUrl }}
           className="w-48 h-48 rounded-full border-4 border-white"
         />
       </View>
@@ -75,7 +154,7 @@ const Profile = () => {
       {/* Thông tin người dùng */}
       <View className="items-center mt-24">
         <Text className="text-3xl font-bold">{user?.fullName}</Text>
-        <Text className="text-gray-500 text-lg">Nấu ăn từ 10/2024</Text>
+        <Text className="text-gray-500 text-lg">{bio}</Text>
       </View>
 
       {/* Badge */}
@@ -162,6 +241,40 @@ const Profile = () => {
           />
         </TouchableOpacity>
       </View>
+      <Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => setModalVisible(false)}
+  >
+    <View className="flex-1 justify-center items-center bg-black/30 px-4">
+      <View className="bg-white w-full rounded-xl p-6 space-y-4">
+        <Text className="text-xl font-semibold  mb-2">Giới thiệu hồ sơ</Text>
+        <TextInput
+          placeholder="Nhập nội dung giới thiệu..."
+          className="border border-gray-300 rounded-lg p-3 text-base"
+          value={editingBio}
+          onChangeText={setEditingBio}
+          multiline
+        />
+        <View className="flex-row justify-end mt-4">
+          <TouchableOpacity onPress={() => setModalVisible(false)}>
+            <Text className="text-gray-500 text-base">Hủy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="ml-6"
+            onPress={() => {
+              setBio(editingBio);
+              setModalVisible(false);
+            }}
+          >
+            <Text className="text-green-600 font-semibold text-base">Lưu</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </Modal>
+
     </View>
   );
 };
