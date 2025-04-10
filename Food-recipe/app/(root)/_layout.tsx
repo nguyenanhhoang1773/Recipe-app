@@ -22,6 +22,7 @@ const RootLayout = () => {
         name: user?.fullName,
         image_url: user?.imageUrl,
         email: user?.emailAddresses[0].emailAddress,
+        bio: "",
         favorites: [],
         recentlyLogin: user?.createdAt,
       })

@@ -10,11 +10,13 @@ import images from "@/constant/images";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import data from "@/constant/data";
 import { Modal, TextInput } from "react-native";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useUser, useClerk } from "@clerk/clerk-expo";
 import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+
 type TabParamList = {
   Profile: undefined;
   Favorite: undefined;
@@ -30,10 +32,30 @@ const Profile = () => {
   const [modalVisible, setModalVisible] = useState(false); 
   const [editingBio, setEditingBio] = useState(""); 
 
-
   useLayoutEffect(() => {
     navigation.setOptions({ animation: "slide_from_right" });
   }, [navigation]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+    }
+  }, [user]);
+  
+  const fetchUserData = async () => {
+    try {
+      const res = await axios.get(`${hostId}:80/api/user/${user?.id}`);
+      const { bio, image_url } = res.data;
+      if (bio) setBio(bio);
+      if (image_url) setAvatar(image_url);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Lỗi khi lấy dữ liệu người dùng:", error.message);
+      } else {
+        console.error("Lỗi không xác định:", error);
+      }
+    }    
+  };
 
   const handleSettingsPress = () => {
     Alert.alert(
@@ -100,9 +122,11 @@ const Profile = () => {
       { cancelable: true }
     );
   };
+  const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
   const handleAddBio = () => {
     setEditingBio(bio); 
     setModalVisible(true);
+
   };  
   
   const handleLogOut = () => {
@@ -152,8 +176,8 @@ const Profile = () => {
       </View>
 
       {/* Thông tin người dùng */}
-      <View className="items-center mt-24">
-        <Text className="text-3xl font-bold">{user?.fullName}</Text>
+      <View className="items-center mt-28">
+        <Text className="text-2xl font-bold">{user?.fullName}</Text>
         <Text className="text-gray-500 text-lg">{bio}</Text>
       </View>
 
@@ -242,38 +266,56 @@ const Profile = () => {
         </TouchableOpacity>
       </View>
       <Modal
-  animationType="slide"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => setModalVisible(false)}
-  >
-    <View className="flex-1 justify-center items-center bg-black/30 px-4">
-      <View className="bg-white w-full rounded-xl p-6 space-y-4">
-        <Text className="text-xl font-semibold  mb-2">Giới thiệu hồ sơ</Text>
-        <TextInput
-          placeholder="Nhập nội dung giới thiệu..."
-          className="border border-gray-300 rounded-lg p-3 text-base"
-          value={editingBio}
-          onChangeText={setEditingBio}
-          multiline
-        />
-        <View className="flex-row justify-end mt-4">
-          <TouchableOpacity onPress={() => setModalVisible(false)}>
-            <Text className="text-gray-500 text-base">Hủy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="ml-6"
-            onPress={() => {
-              setBio(editingBio);
-              setModalVisible(false);
-            }}
-          >
-            <Text className="text-green-600 font-semibold text-base">Lưu</Text>
-          </TouchableOpacity>
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        >
+        <View className="flex-1 justify-center items-center bg-black/30 px-4">
+          <View className="bg-white w-full rounded-xl p-6 space-y-4">
+            <Text className="text-xl font-semibold  mb-2">Giới thiệu hồ sơ</Text>
+            <TextInput
+              placeholder="Nhập nội dung giới thiệu..."
+              className="border border-gray-300 rounded-lg p-3 text-base"
+              value={editingBio}
+              onChangeText={setEditingBio}
+              multiline
+            />
+            <View className="flex-row justify-end mt-4">
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text className="text-gray-500 text-base">Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="ml-6"
+                onPress={() => {
+                  setBio(editingBio);
+                  setModalVisible(false);
+
+                  axios
+                  .post(`${hostId}:80/api/login`, {
+                    id_user: user?.id,
+                    name: user?.fullName,
+                    email: user?.primaryEmailAddress?.emailAddress,
+                    image_url: avatar || user?.imageUrl,
+                    bio: editingBio,
+                    favorites: [],
+                    recentlyLogin: user?.createdAt,
+                  })
+                  .then((res) => {
+                    setBio(res.data.bio);
+                    console.log("Cập nhật thành công:", res.data);
+                  })
+                  .catch((err) => {
+                    console.error("Lỗi khi cập nhật:", err.message);
+                  });
+                }}
+              >
+                <Text className="text-green-600 font-semibold text-base">Lưu</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
-    </View>
-  </Modal>
+      </Modal>
 
     </View>
   );

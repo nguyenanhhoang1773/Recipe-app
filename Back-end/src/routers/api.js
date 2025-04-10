@@ -27,9 +27,4 @@ router.post("/addFeedback", addFeedback);
 //router Search
 router.post("/search", searchItems);
 
-//router profile
-router.get('/profile/:id_user', getProfile);
-router.post('/profile', createProfile);
-router.put('/profile/:id_user', updateProfile);
-
 module.exports = router;
