@@ -17,7 +17,7 @@ router.post("/login", login);
 // router liked
 router.get("/liked/:id_user", getLiked);
 router.post("/addLiked", addLiked);
-router.delete("/unLiked", unLiked);
+router.post("/unLiked", unLiked);
 
 // router feedback
 router.post("/getFeedback", getFeedback);

@@ -78,7 +78,7 @@ export default function Details() {
             <View>
                 <View className='m-1 p-1'>
 
-                    {player && (
+                    {/* {player && (
                         <VideoView
                             player={player}
                             allowsFullscreen
@@ -86,7 +86,7 @@ export default function Details() {
                             startsPictureInPictureAutomatically
                             style={{ width: '100%', height: 200, marginTop: 10 }} // Thêm style cho VideoView
                         />
-                    )}
+                    )} */}
                 </View>
                 <Ionicons className="absolute left-1 top-1" name={"arrow-back-circle-outline"} color="#999999" size={30} onPress={() => navigation.goBack()} />
             </View>
@@ -110,7 +110,7 @@ export default function Details() {
                             </Text>
                         )
                     ))}
-                    <Image source={item.image} className='w-full h-[180px] rounded-md my-2 ' />
+                    <Image source={{ uri: item.image }} className='w-full h-[180px] rounded-md my-2 ' />
                     <Text className='italic'>Để lại nhận xét, chia sẻ của bạn tại đây nhé !!!</Text>
                 </View>
 

@@ -4,6 +4,7 @@ const login = async (req, res) => {
   try {
     const { id_user, name, image_url, email, favorites, recentlyLogin } =
       req.body;
+    console.log("xin chào")
     let user = await User.findOne({ id_user });
     if (!user) {
       user = new User({
