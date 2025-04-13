@@ -3,12 +3,11 @@ const Schema = mongoose.Schema;
 
 
 const Liked = new Schema({
-    idUser: { type: String },
-    idProduct: { type: String },
+    id_user: { type: String },
+    id_recipe: { type: String },
     name: { type: String },
     image: { type: String },
-    quantity: { type: Number },
-    realPrice: { type: Number },
+    description: { type: String },
     createdAt: { type: Date, default: Date.now },
 
 });
