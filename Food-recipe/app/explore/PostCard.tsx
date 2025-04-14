@@ -1,6 +1,12 @@
-import { View, Text, StyleSheet, Image, Alert, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
-import images from "@/constant/images";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -10,21 +16,31 @@ type RootStackParamList = {
   POST: undefined;
 };
 
-type USER_AVATAR = {
-  name?: string;
-  image?: any;
-  date?: string;
+type PostDataProps = {
+  displayName: string;
+  avatar: string;
+  name: string;
+  image: string;
+  description: string;
+  instructions: string;
+  createdAt: string;
   onDelete?: () => void;
 };
 
 const PostCard = ({
-  name = "Suong",
-  image = images.pho,
-  date = "30/4",
+  displayName,
+  avatar,
+  name,
+  image,
+  description,
+  instructions,
+  createdAt,
   onDelete = () => {},
-}: USER_AVATAR) => {
+}: PostDataProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [showOptions, setShowOptions] = useState(false);
+  const [showFullInstructions, setShowFullInstructions] = useState(false);
+  const shouldShowToggle = instructions.length > 100;
 
   const handleDelete = () => {
     Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xóa bài này?", [
@@ -33,25 +49,28 @@ const PostCard = ({
     ]);
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN");
+  };
+
   return (
     <View style={styles.container}>
-      {/* Avatar */}
+      {/* Avatar + Tên người đăng + Ngày */}
       <View style={styles.userInfoWrapper}>
-        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-          <Image source={image} style={styles.avatar} />
-          <View style={{ marginLeft: 10 }}>
-            <Text style={styles.name}>{name}</Text>
-            <Text>{date}</Text>
+        <View style={styles.userInfo}>
+          <Image source={{ uri: avatar }} style={styles.avatar} />
+          <View style={styles.nameDate}>
+            <Text style={styles.name}>{displayName}</Text>
+            <Text style={styles.date}>{formatDate(createdAt)}</Text>
           </View>
         </View>
-
-        {/* Icon */}
         <TouchableOpacity onPress={() => setShowOptions(!showOptions)}>
           <Ionicons name="ellipsis-vertical" size={20} color="black" />
         </TouchableOpacity>
       </View>
 
-      {/* Menu Tùy chọn */}
+      {/* Menu tùy chọn */}
       {showOptions && (
         <View style={styles.menu}>
           <TouchableOpacity onPress={() => navigation.navigate("POST")}>
@@ -63,19 +82,38 @@ const PostCard = ({
         </View>
       )}
 
-      {/* Nội dung bài viết */}
-      <Text style={styles.text}> mamsnfkjsfjf</Text>
-      <Image source={image} style={styles.img} />
+      {/* Ảnh món ăn */}
+      <Image source={{ uri: image }} style={styles.img} />
+
+      {/* Thông tin món ăn */}
+      <Text style={styles.foodTitle}>{name}</Text>
+      <Text style={styles.description}> {description}</Text>
+      <Text
+        style={styles.instructions}
+        numberOfLines={showFullInstructions ? undefined : 1}
+      > 
+        <Text style={{ fontWeight: 'bold', fontSize:15 }}>Công thức: </Text>
+         {'\n'}
+         {instructions}
+      </Text>
+
+      {shouldShowToggle && (
+        <TouchableOpacity onPress={() => setShowFullInstructions(!showFullInstructions)}>
+          <Text style={styles.toggleText}>
+            {showFullInstructions ? "Thu gọn" : "Xem thêm"}
+          </Text>
+        </TouchableOpacity>
+      )}
 
       {/* Like + Comment */}
       <View style={styles.actions}>
         <View style={styles.sub}>
           <Ionicons name="heart-outline" size={24} color="black" />
-          <Text style={{ fontSize: 17 }}> 10 </Text>
+          <Text style={styles.actionText}>10</Text>
         </View>
         <View style={styles.sub}>
           <Ionicons name="chatbubble-outline" size={24} color="black" />
-          <Text style={{ fontSize: 17 }}> 10 </Text>
+          <Text style={styles.actionText}>10</Text>
         </View>
       </View>
     </View>
@@ -90,31 +128,63 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 8,
     marginTop: 10,
+    elevation: 2,
     position: "relative",
   },
   userInfoWrapper: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
   },
   avatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
   },
+  nameDate: {
+    marginLeft: 10,
+  },
   name: {
     fontSize: 16,
     fontWeight: "bold",
   },
-  text: {
-    fontSize: 18,
-    marginTop: 10,
+  date: {
+    fontSize: 12,
+    color: "gray",
   },
   img: {
     width: "100%",
     height: 300,
     borderRadius: 10,
-    objectFit: "cover",
+    marginTop: 10,
+    resizeMode: "cover",
+  },
+  foodTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  description: {
+    fontSize: 14,
+    color: "#444",
+    marginTop: 4,
+  },
+  instructions: {
+    fontSize: 14,
+    color: "#444",
+    marginTop: 4,
+  },
+  toggleText: {
+    color: "#3498db",
+    fontSize: 14,
+    marginTop: 4,
+    fontWeight: "500",
   },
   sub: {
     flexDirection: "row",
@@ -127,6 +197,9 @@ const styles = StyleSheet.create({
     gap: 20,
     alignItems: "center",
   },
+  actionText: {
+    fontSize: 17,
+  },
   menu: {
     position: "absolute",
     top: 60,
@@ -138,6 +211,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 6,
+    elevation: 4,
   },
   menuItem: {
     paddingVertical: 6,
