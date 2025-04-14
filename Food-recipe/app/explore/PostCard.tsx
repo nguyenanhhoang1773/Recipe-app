@@ -88,13 +88,14 @@ const PostCard = ({
       {/* Thông tin món ăn */}
       <Text style={styles.foodTitle}>{name}</Text>
       <Text style={styles.description}> {description}</Text>
+
       <Text
         style={styles.instructions}
         numberOfLines={showFullInstructions ? undefined : 1}
-      > 
-        <Text style={{ fontWeight: 'bold', fontSize:15 }}>Công thức: </Text>
-         {'\n'}
-         {instructions}
+      >
+        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>Công thức:</Text>
+        {'\n'}
+        {instructions}
       </Text>
 
       {shouldShowToggle && (

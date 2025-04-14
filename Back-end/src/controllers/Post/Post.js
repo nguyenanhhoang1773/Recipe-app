@@ -64,8 +64,6 @@ const addPost = async (req, res) => {
     });
   }
 };
-
-
 //  Xóa bài viết theo ID
 const deletePost = async (req, res) => {
   try {

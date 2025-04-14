@@ -36,7 +36,8 @@ const POST = () => {
     "Người dùng";
 
   const today = new Date().toLocaleDateString("vi-VN");
-  const avatarUri = userData?.avatar || user?.imageUrl;
+  const avatarUri =
+    userData?.avatar || user?.imageUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
   useEffect(() => {
     if (!user?.id) return;
@@ -120,6 +121,7 @@ const POST = () => {
         setIngredients("");
         setInstructions("");
         setSelectedImage(null);
+        
       } else {
         Alert.alert("Thất bại", data.message || "Đăng bài không thành công.");
       }
