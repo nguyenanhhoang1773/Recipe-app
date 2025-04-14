@@ -12,6 +12,8 @@ const {
 } = require("../controllers/Feedback/Feedback.js");
 const { login, updateUser, getUser } = require("../controllers/User/User.js");
 const searchItems = require("../controllers/Search/Search.js");
+const { createPost } = require('../controllers/Post/Post');
+
 //router User
 router.post("/login", login);
 router.post("/getUser", getUser);
@@ -28,5 +30,8 @@ router.post("/addFeedback", addFeedback);
 
 //router Search
 router.post("/search", searchItems);
+
+//  router Post
+router.post("/create-post", createPost);
 
 module.exports = router;
