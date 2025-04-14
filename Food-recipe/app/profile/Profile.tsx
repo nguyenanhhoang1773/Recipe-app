@@ -113,7 +113,6 @@ const Profile = () => {
     } as any);
 
     data.append("upload_preset", "mepeyyon");
-    data.append("cloud_name", "dnynvkw0b");
 
     try {
       const res = await fetch("https://api.cloudinary.com/v1_1/dnynvkw0b/image/upload", {
@@ -195,37 +194,44 @@ const Profile = () => {
 
   };
 
-  const handleBio = () => {
-    if (editingBio.trim() === "") {
-      Alert.alert("Lỗi", "Vui lòng nhập nội dung giới thiệu.");
-      return;
-    }
-    if (editingBio.length > 100) {
-      Alert.alert("Lỗi", "Giới thiệu không được vượt quá 100 ký tự.");
-      return;
-    }
+  const handleBio = async () => {
     if (!user?.id) {
       Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
       return;
     }
-
-    setBio(editingBio);
-    setModalVisible(false);
-
-    axios
-      .patch(`${hostId}:80/api/updateUser`, {
-        id_user: user?.id,
-        bio: editingBio,
-      })
-      .then((res) => {
-        setBio(res.data.user.bio);
-        console.log("Cập nhật thành công:", res.data);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi cập nhật:", err.message);
-        Alert.alert("Lỗi", "Không thể cập nhật hồ sơ. Vui lòng thử lại.");
+  
+    const trimmedBio = editingBio.trim();
+  
+    if (trimmedBio === "") {
+      Alert.alert("Lỗi", "Vui lòng nhập nội dung giới thiệu.");
+      return;
+    }
+  
+    if (trimmedBio.length > 100) {
+      Alert.alert("Lỗi", "Giới thiệu không được vượt quá 100 ký tự.");
+      return;
+    }
+  
+    try {
+      setModalVisible(false);
+      setBio(trimmedBio);
+  
+      const res = await axios.patch<{ user: UserData }>(`${hostId}:80/api/updateUser`, {
+        id_user: user.id,
+        bio: trimmedBio,
       });
-  }
+  
+      if (res.data?.user?.bio) {
+        setBio(res.data.user.bio);
+      }
+  
+      console.log("Cập nhật thành công:", res.data);
+    } catch (error: any) {
+      console.error("Lỗi khi cập nhật:", error?.message || error);
+      Alert.alert("Lỗi", "Không thể cập nhật hồ sơ. Vui lòng thử lại.");
+    }
+  };
+  
 
   const handleLogOut = () => {
     Alert.alert("Thông báo!", "Bạn có chắc chắn muốn đăng xuất không?", [
@@ -244,8 +250,7 @@ const Profile = () => {
           resizeMode="cover"
         />
         <View
-          className="absolute bottom-0 w-full h-5 bg-gray-100"
-          style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32 }}
+          className="absolute bottom-0 w-full h-5 bg-gray-100 rounded-t-[32px]"
         />
         <View className="absolute w-full px-2">
           <View className="flex-row justify-between items-center px-6 pt-6">
@@ -262,8 +267,7 @@ const Profile = () => {
 
       {/* Avatar */}
       <View
-        className="absolute w-full items-center"
-        style={{ top: 100 }}
+        className="absolute w-full items-center top-[100px]"
       >
         <Image
           source={{ uri: avatar || user?.imageUrl }}

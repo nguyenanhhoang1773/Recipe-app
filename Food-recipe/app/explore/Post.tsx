@@ -21,6 +21,8 @@ type USER_AVATAR = {
   date?: string;
 };
 
+const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
+
 const POST = ({
   name = "Suong",
   image = images.pho,
@@ -31,9 +33,17 @@ const POST = ({
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const navigation = useNavigation();
 
+  // Request permissions and pick an image
   const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert("Quyền bị từ chối", "Cần quyền truy cập thư viện ảnh để chọn hình.");
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
@@ -48,6 +58,7 @@ const POST = ({
     }
   };
 
+  // Upload image to Cloudinary
   const uploadImageToCloudinary = async (imageUri: string) => {
     const data = new FormData();
     data.append("file", {
@@ -58,42 +69,41 @@ const POST = ({
     data.append("upload_preset", "Food-recipe");
 
     try {
-      const res = await fetch("https://api.cloudinary.com/v1_1/dry2myuau/image/upload", {
+      const response = await fetch("https://api.cloudinary.com/v1_1/dry2myuau/image/upload", {
         method: "POST",
         body: data,
       });
 
-      const result = await res.json();
+      if (!response.ok) {
+        throw new Error("Cloudinary upload failed");
+      }
+
+      const result = await response.json();
+      console.log("Cloudinary upload result:", result);
       return result.secure_url;
     } catch (error) {
-      console.log("Upload error", error);
+      console.error("Upload error:", error);
       return null;
     }
   };
 
+  // Handle post submission
   const handlePost = async () => {
     if (!title || !description || !ingredients || !instructions) {
       return Alert.alert("Thiếu thông tin", "Vui lòng điền đủ thông tin!");
     }
 
+    setIsLoading(true); // Show loading state
+
     let imageUrl = "";
     if (selectedImage) {
       imageUrl = await uploadImageToCloudinary(selectedImage);
       if (!imageUrl) {
+        setIsLoading(false);
         return Alert.alert("Lỗi", "Tải ảnh lên thất bại.");
-        
       }
     }
 
-    // const postData = {
-    //   text: JSON.stringify({
-    //     name: title,
-    //     description,
-    //     ingredients,
-    //     instructions,
-    //   }),
-    //   image: imageUrl,
-    // };
     const postData = {
       name: title,
       description,
@@ -103,19 +113,20 @@ const POST = ({
     };
 
     try {
-      console.log("Post data:", postData);
-      const response = await fetch("http://192.168.1.7:80/api/create-post", {
+      const url = `${hostId}:80/api/create-post`;
+      console.log("Fetching URL:", url); // Debug the URL
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(postData),
       });
-      console.log("Response status:", response.status); // Log the HTTP status
-      const data = await response.json();
-      console.log("Response data:", data); // Log the response body
 
-      
+      console.log("Response status:", response.status); // Debug the response status
+      const data = await response.json();
+      console.log("Response data:", data); // Debug the response data
+
       if (data.success) {
         Alert.alert("Thông báo", "Đăng bài thành công!");
         setTitle("");
@@ -124,15 +135,13 @@ const POST = ({
         setInstructions("");
         setSelectedImage(null);
       } else {
-        Alert.alert("Lỗi", "Đăng bài thất bại.");
+        Alert.alert("Lỗi", "Đăng bài thất bại: " + (data.message || "Unknown error"));
       }
     } catch (err) {
-      console.log("Error posting:", err);
-      // console.log("Error name:", err.name);
-      // console.log("Error message:", err.message);
-      // console.log("Error stack:", err.stack);
-
-      Alert.alert("Lỗi", "Có lỗi xảy ra khi đăng bài.");
+      console.error("Error posting:", err);
+      Alert.alert("Lỗi", "Có lỗi xảy ra khi đăng bài: " + (err as Error).message);
+    } finally {
+      setIsLoading(false); // Hide loading state
     }
   };
 
@@ -140,7 +149,12 @@ const POST = ({
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.headerBar}>
-        <Ionicons name="arrow-back" size={24} color="black" onPress={() => navigation.goBack()} />
+        <Ionicons
+          name="arrow-back"
+          size={24}
+          color="black"
+          onPress={() => navigation.goBack()}
+        />
         <Text style={styles.headerText}>Thêm bài viết</Text>
         <View style={{ width: 24 }} /> {/* Để cân header */}
       </View>
@@ -156,10 +170,33 @@ const POST = ({
 
       {/* Form */}
       <View style={styles.form}>
-        <TextInput placeholder="Tiêu đề" value={title} onChangeText={setTitle} style={styles.input} />
-        <TextInput placeholder="Mô tả" value={description} onChangeText={setDescription} multiline style={[styles.input, { height: 50 }]} />
-        <TextInput placeholder="Nguyên liệu" value={ingredients} onChangeText={setIngredients} multiline style={[styles.input, { height: 80 }]} />
-        <TextInput placeholder="Công thức chi tiết" value={instructions} onChangeText={setInstructions} multiline style={[styles.input, { height: 140 }]} />
+        <TextInput
+          placeholder="Tiêu đề"
+          value={title}
+          onChangeText={setTitle}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Mô tả"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          style={[styles.input, { height: 50 }]}
+        />
+        <TextInput
+          placeholder="Nguyên liệu"
+          value={ingredients}
+          onChangeText={setIngredients}
+          multiline
+          style={[styles.input, { height: 80 }]}
+        />
+        <TextInput
+          placeholder="Công thức chi tiết"
+          value={instructions}
+          onChangeText={setInstructions}
+          multiline
+          style={[styles.input, { height: 140 }]}
+        />
       </View>
 
       {selectedImage && <Image source={{ uri: selectedImage }} style={styles.preview} />}
@@ -169,8 +206,12 @@ const POST = ({
         <Text style={styles.imagePickerText}>Chọn hình ảnh</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handlePost}>
-        <Text style={styles.buttonText}>Đăng</Text>
+      <TouchableOpacity
+        style={[styles.button, isLoading && { opacity: 0.7 }]}
+        onPress={handlePost}
+        disabled={isLoading}
+      >
+        <Text style={styles.buttonText}>{isLoading ? "Đang đăng..." : "Đăng"}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
