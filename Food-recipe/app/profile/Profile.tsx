@@ -28,34 +28,42 @@ const Profile = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigation = useNavigation<NativeStackNavigationProp<TabParamList>>();
-  const [bio, setBio] = useState(""); 
-  const [modalVisible, setModalVisible] = useState(false); 
-  const [editingBio, setEditingBio] = useState(""); 
+  const [editingBio, setEditingBio] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(user?.imageUrl || null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
   useLayoutEffect(() => {
     navigation.setOptions({ animation: "slide_from_right" });
   }, [navigation]);
+
+  interface UserData {
+    bio?: string;
+    image_url?: string;
+  }
+
+  const fetchUserData = async () => {
+    if (!user?.id) {
+      console.log("Không có user.id");
+      return;
+    }
+    try {
+      const res = await axios.post<UserData>(`${hostId}:80/api/getUser`, {
+        id_user: user.id,
+      });
+      setBio(res.data.bio || "");
+      setAvatar(res.data.image_url || user.imageUrl);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ.");
+    }
+  };
 
   useEffect(() => {
     if (user) {
       fetchUserData();
     }
   }, [user]);
-  
-  const fetchUserData = async () => {
-    try {
-      const res = await axios.get(`${hostId}:80/api/user/${user?.id}`);
-      const { bio, image_url } = res.data;
-      if (bio) setBio(bio);
-      if (image_url) setAvatar(image_url);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Lỗi khi lấy dữ liệu người dùng:", error.message);
-      } else {
-        console.error("Lỗi không xác định:", error);
-      }
-    }    
-  };
 
   const handleSettingsPress = () => {
     Alert.alert(
@@ -72,39 +80,11 @@ const Profile = () => {
             Alert.alert("Chọn ảnh", "Bạn muốn thực hiện thao tác nào?", [
               {
                 text: "Chụp ảnh",
-                onPress: async () => {
-                  const permission = await ImagePicker.requestCameraPermissionsAsync();
-                  if (!permission.granted) return;
-        
-                  const result = await ImagePicker.launchCameraAsync({
-                    allowsEditing: true,
-                    aspect: [1, 1],
-                    quality: 1,
-                  });
-        
-                  if (!result.canceled) {
-                    const uri = result.assets[0].uri;
-                    console.log("Ảnh chụp:", uri);
-                  }
-                },
+                onPress: handleTakePhoto,
               },
               {
                 text: "Chọn từ thư viện",
-                onPress: async () => {
-                  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-                  if (!permission.granted) return;
-        
-                  const result = await ImagePicker.launchImageLibraryAsync({
-                    allowsEditing: true,
-                    aspect: [1, 1],
-                    quality: 1,
-                  });
-        
-                  if (!result.canceled) {
-                    const uri = result.assets[0].uri;
-                    console.log("Ảnh đã chọn:", uri);
-                  }
-                },
+                onPress: handleSelectPhoto,
               },
               {
                 text: "Hủy",
@@ -112,31 +92,147 @@ const Profile = () => {
               },
             ]);
           },
-        },        
+        },
         {
           text: "Thêm giới thiệu hồ sơ",
           onPress: handleAddBio,
         },
-        
+
       ],
       { cancelable: true }
     );
   };
-  const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
+
+  const uploadToCloudinary = async (imageUri: string) => {
+    const data = new FormData();
+
+    data.append("file", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "upload.jpg",
+    } as any);
+
+    data.append("upload_preset", "mepeyyon");
+    data.append("cloud_name", "dnynvkw0b");
+
+    try {
+      const res = await fetch("https://api.cloudinary.com/v1_1/dnynvkw0b/image/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      const json = await res.json();
+      const secureUrl = json.secure_url;
+      console.log("Uploaded to Cloudinary:", secureUrl);
+      return secureUrl;
+    } catch (error) {
+      console.error("Lỗi khi upload lên Cloudinary:", error);
+      throw error;
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Quyền bị từ chối", "Vui lòng cấp quyền truy cập camera trong cài đặt.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      updateAvatar(uri);
+    } else {
+      console.log("Không có ảnh nào được chụp hoặc bị lỗi.");
+    }
+  };
+
+  const handleSelectPhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Quyền bị từ chối", "Vui lòng cấp quyền truy cập camera trong cài đặt.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      updateAvatar(uri);
+    } else {
+      console.log("Không có ảnh nào được chọn hoặc bị lỗi.");
+    }
+  };
+
+  const updateAvatar = async (uri: string) => {
+    if (!user?.id) {
+      Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
+      return;
+    }
+    try {
+      const cloudUrl = await uploadToCloudinary(uri);
+      await axios.patch(`${hostId}:80/api/updateUser`, {
+        id_user: user.id,
+        image_url: cloudUrl,
+      });
+      setAvatar(cloudUrl);
+      Alert.alert("Thành công", "Ảnh đại diện đã được cập nhật.");
+      console.log("Ảnh mới:", cloudUrl);
+    } catch (err) {
+      Alert.alert("Lỗi", "Không thể tải ảnh lên Cloudinary");
+    }
+  };
+  
+
   const handleAddBio = () => {
-    setEditingBio(bio); 
+    setEditingBio(bio);
     setModalVisible(true);
 
-  };  
-  
+  };
+
+  const handleBio = () => {
+    if (editingBio.trim() === "") {
+      Alert.alert("Lỗi", "Vui lòng nhập nội dung giới thiệu.");
+      return;
+    }
+    if (editingBio.length > 100) {
+      Alert.alert("Lỗi", "Giới thiệu không được vượt quá 100 ký tự.");
+      return;
+    }
+    if (!user?.id) {
+      Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
+      return;
+    }
+
+    setBio(editingBio);
+    setModalVisible(false);
+
+    axios
+      .patch(`${hostId}:80/api/updateUser`, {
+        id_user: user?.id,
+        bio: editingBio,
+      })
+      .then((res) => {
+        setBio(res.data.user.bio);
+        console.log("Cập nhật thành công:", res.data);
+      })
+      .catch((err) => {
+        console.error("Lỗi khi cập nhật:", err.message);
+        Alert.alert("Lỗi", "Không thể cập nhật hồ sơ. Vui lòng thử lại.");
+      });
+  }
+
   const handleLogOut = () => {
     Alert.alert("Thông báo!", "Bạn có chắc chắn muốn đăng xuất không?", [
       { text: "Hủy", style: "cancel" },
       { text: "Đăng xuất", onPress: () => signOut() },
     ]);
   };
-
-  const [avatar, setAvatar] = useState<string | null>(null);
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -153,7 +249,7 @@ const Profile = () => {
         />
         <View className="absolute w-full px-2">
           <View className="flex-row justify-between items-center px-6 pt-6">
-            <Text className="text-2xl font-semibold">My profile</Text>
+            <Text className="text-2xl font-semibold">Thông tin cá nhân</Text>
             <MaterialIcons
               onPress={handleSettingsPress}
               name="settings"
@@ -178,18 +274,11 @@ const Profile = () => {
       {/* Thông tin người dùng */}
       <View className="items-center mt-28">
         <Text className="text-2xl font-bold">{user?.fullName}</Text>
-        <Text className="text-gray-500 text-lg">{bio}</Text>
-      </View>
-
-      {/* Badge */}
-      <View className="flex-row justify-center mt-3 space-x-3">
-        <View className="items-center min-w-[150px]">
-          <Text className="text-xl font-semibold">45</Text>
-          <Text className="text-gray-500 text-lg text-center">Đã follow</Text>
-        </View>
-        <View className="items-center min-w-[150px]">
-          <Text className="text-xl font-semibold">1.32k</Text>
-          <Text className="text-gray-500 text-lg text-center">Followers</Text>
+        <View className="flex-row items-center">
+          <Text className="text-gray-500 text-lg">{bio || "Chưa có giới thiệu..."}</Text>
+          <TouchableOpacity onPress={handleAddBio}>
+            <Ionicons name="pencil" size={20} color="gray" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -270,11 +359,16 @@ const Profile = () => {
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          className="flex-1 justify-center items-center bg-black/30 px-4"
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
         >
-        <View className="flex-1 justify-center items-center bg-black/30 px-4">
-          <View className="bg-white w-full rounded-xl p-6 space-y-4">
+          <TouchableOpacity activeOpacity={1} className="bg-white w-full rounded-xl p-6 space-y-4">
             <Text className="text-xl font-semibold  mb-2">Giới thiệu hồ sơ</Text>
             <TextInput
+              maxLength={100}
               placeholder="Nhập nội dung giới thiệu..."
               className="border border-gray-300 rounded-lg p-3 text-base"
               value={editingBio}
@@ -288,33 +382,14 @@ const Profile = () => {
               <TouchableOpacity
                 className="ml-6"
                 onPress={() => {
-                  setBio(editingBio);
-                  setModalVisible(false);
-
-                  axios
-                  .post(`${hostId}:80/api/login`, {
-                    id_user: user?.id,
-                    name: user?.fullName,
-                    email: user?.primaryEmailAddress?.emailAddress,
-                    image_url: avatar || user?.imageUrl,
-                    bio: editingBio,
-                    favorites: [],
-                    recentlyLogin: user?.createdAt,
-                  })
-                  .then((res) => {
-                    setBio(res.data.bio);
-                    console.log("Cập nhật thành công:", res.data);
-                  })
-                  .catch((err) => {
-                    console.error("Lỗi khi cập nhật:", err.message);
-                  });
+                  handleBio()
                 }}
               >
                 <Text className="text-green-600 font-semibold text-base">Lưu</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
     </View>

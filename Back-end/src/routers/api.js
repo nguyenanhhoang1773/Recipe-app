@@ -10,10 +10,12 @@ const {
   getFeedback,
   addFeedback,
 } = require("../controllers/Feedback/Feedback.js");
-const { login } = require("../controllers/User/User.js");
+const { login, updateUser, getUser } = require("../controllers/User/User.js");
 const searchItems = require("../controllers/Search/Search.js");
 //router User
 router.post("/login", login);
+router.post("/getUser", getUser);
+router.patch("/updateUser", updateUser);
 
 // router liked
 router.get("/liked/:id_user", getLiked);
