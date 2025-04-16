@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import images from "@/constant/images";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
-import data from "@/constant/data";
 import { Modal, TextInput } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
@@ -16,6 +16,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useUser, useClerk } from "@clerk/clerk-expo";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
+import { router } from "expo-router";
 
 type TabParamList = {
   Profile: undefined;
@@ -27,11 +28,13 @@ type TabParamList = {
 const Profile = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<TabParamList>>();
   const [editingBio, setEditingBio] = useState("");
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<string | null>(user?.imageUrl || null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
   useLayoutEffect(() => {
@@ -42,6 +45,23 @@ const Profile = () => {
     bio?: string;
     image_url?: string;
   }
+
+  type Post = {
+    _id: string;
+    name: string;
+    image: string;
+    description: string;
+  };
+
+  const fakeLoadData = (message: string) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      fetchUserData();
+      fetchUserPost();
+      Alert.alert("Thông báo!", message, [{ text: "OK" }]);
+    }, 3000);
+  };
 
   const fetchUserData = async () => {
     if (!user?.id) {
@@ -59,9 +79,22 @@ const Profile = () => {
     }
   };
 
+  const fetchUserPost = async () => {
+    try {
+      const res = await axios.post<Post[]>(`${hostId}:80/api/getPost`, {
+        id_user: user?.id,
+      });
+      console.log("Công thức nhận được:", res.data);
+      setPosts(res.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy công thức cá nhân:", error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchUserData();
+      fetchUserPost();
     }
   }, [user]);
 
@@ -179,14 +212,14 @@ const Profile = () => {
         id_user: user.id,
         image_url: cloudUrl,
       });
+      fakeLoadData("Ảnh đại diện đã được cập nhật!");
       setAvatar(cloudUrl);
-      Alert.alert("Thành công", "Ảnh đại diện đã được cập nhật.");
       console.log("Ảnh mới:", cloudUrl);
     } catch (err) {
       Alert.alert("Lỗi", "Không thể tải ảnh lên Cloudinary");
     }
   };
-  
+
 
   const handleAddBio = () => {
     setEditingBio(bio);
@@ -199,39 +232,40 @@ const Profile = () => {
       Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
       return;
     }
-  
+
     const trimmedBio = editingBio.trim();
-  
+
     if (trimmedBio === "") {
       Alert.alert("Lỗi", "Vui lòng nhập nội dung giới thiệu.");
       return;
     }
-  
+
     if (trimmedBio.length > 100) {
       Alert.alert("Lỗi", "Giới thiệu không được vượt quá 100 ký tự.");
       return;
     }
-  
+
     try {
       setModalVisible(false);
       setBio(trimmedBio);
-  
+
       const res = await axios.post<{ user: UserData }>(`${hostId}:80/api/updateUser`, {
         id_user: user.id,
         bio: trimmedBio,
       });
-  
+
       if (res.data?.user?.bio) {
         setBio(res.data.user.bio);
+        fakeLoadData("Giới thiệu hồ sơ đã được cập nhật!");
       }
-  
+
       console.log("Cập nhật thành công:", res.data);
     } catch (error: any) {
       console.error("Lỗi khi cập nhật:", error?.message || error);
       Alert.alert("Lỗi", "Không thể cập nhật hồ sơ. Vui lòng thử lại.");
     }
   };
-  
+
 
   const handleLogOut = () => {
     Alert.alert("Thông báo!", "Bạn có chắc chắn muốn đăng xuất không?", [
@@ -242,6 +276,17 @@ const Profile = () => {
 
   return (
     <View className="flex-1 bg-gray-100">
+      {
+        isLoading &&
+        <Modal visible={true} transparent animationType="none">
+          <View className="flex-1 justify-center items-center bg-black/60">
+            <View className="bg-green-500 px-6 py-4 rounded-xl items-center">
+              <ActivityIndicator size="large" color="#fff" />
+              <Text className="text-white mt-2 text-base">Đang tải...</Text>
+            </View>
+          </View>
+        </Modal>
+      }
       {/* Ảnh nền */}
       <View className="relative h-52">
         <Image
@@ -302,23 +347,31 @@ const Profile = () => {
             />
           </TouchableOpacity>
         </View>
-
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={data.recipe.slice(0, 3)}
-          renderItem={({ item }) => (
-            <TouchableOpacity className="mr-4 mt-3">
-              <Image
-                className="w-64 h-40 rounded-lg"
-                source={item.source}
-              />
-              <Text className="text-xl font-medium mt-2 mb-3">
-                {item.title}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
+        {posts.length === 0 ? (
+          <Text className="mt-3 text-gray-500">Bạn chưa có bài viết nào.</Text>
+        ) : (
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={posts.slice(0, 3)}
+            renderItem={({ item }) => (
+              <TouchableOpacity className="mr-4 mt-3">
+                <Image
+                  className="w-64 h-40 rounded-lg"
+                  source={{ uri: item.image }}
+                />
+                <Text className="text-xl font-medium mt-2">
+                  {item.name}
+                </Text>
+                <Text className="text-l mb-3 w-[230px]"
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
+                  {item.description}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </View>
 
       {/* Các chức năng */}
@@ -326,7 +379,8 @@ const Profile = () => {
         <TouchableOpacity
           activeOpacity={0.7}
           className="flex-row items-center py-4 border-b border-gray-200"
-          onPress={() => navigation.navigate("Favorite")}
+          // onPress={() => navigation.navigate("Favorite")}
+          onPress={() => router.push("../Favorite")}
         >
           <Ionicons
             name="heart-outline"

@@ -1,10 +1,11 @@
-import { View, Text, Image, Alert } from 'react-native'
+import { View, Text, Image, Alert, ActivityIndicator, Modal } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import images from '../../constant/images'
 import { TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import axios from 'axios';
+// import Spinner from 'react-native-loading-spinner-overlay';
 const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 interface FeedbackProps {
     id_recipe: string;
@@ -12,6 +13,31 @@ interface FeedbackProps {
 
 const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
     const { user } = useUser();
+
+    const [isLoading, setIsLoading] = useState(false);
+    const fakeLoadData = () => {
+        setIsLoading(true);
+        setTimeout(() => {
+            setIsLoading(false);
+            getFeedback()
+            Alert.alert(
+                'Thông báo!',
+                'Bình luận của bạn về món ăn đã được thêm !!!',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => console.log('Thêm thành công'),
+                        style: 'cancel',
+                    }
+
+                ],
+                { cancelable: false }
+            );
+        }, 3000);
+    };
+
+
+
     // console.log(user)
     type Feedback = {
         user_name: string;
@@ -35,7 +61,9 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
         }
     }
 
-    getFeedback()
+    useEffect(() => {
+        getFeedback()
+    }, [])
 
     const [text, setText] = useState('');
     function handleFeedback() {
@@ -52,7 +80,8 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
         try {
             axios.post(`${hostId}:80/api/addFeedback`, feedback)
                 .then((res) => {
-                    getFeedback()
+                    setText('')
+                    fakeLoadData();
                 })
         } catch (error) {
             console.log("Lỗi:" + error)
@@ -64,7 +93,21 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
     }
     return (
         <View>
+            {
+                isLoading &&
+                <Modal visible={true} transparent animationType="none">
+                    <View className="flex-1 justify-center items-center bg-black/60">
+                        <View className="bg-green-500 px-6 py-4 rounded-xl items-center">
+                            <ActivityIndicator size="large" color="#fff" />
+                            <Text className="text-white mt-2 text-base">Đang tải...</Text>
+                        </View>
+                    </View>
+                </Modal>
+            }
+
             <View className='p-2 my-1  bg-gray-200 rounded-lg'>
+                {/* <Spinner visible={isLoading} textContent="Loading..." textStyle={{ color: '#FFF' }} /> */}
+
                 <Text className='font-bold text-[20px]'>
                     Đánh giá món ăn
                 </Text>
@@ -88,11 +131,13 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
                 </Text>
                 {listFeedback.map((comment, index) => (
                     <View key={index} className=' flex flex-row p-1'>
+
                         <Image source={images.andanh} className='rounded-full h-[50px] w-[50px] mr-2' />
-                        <View className='flex flex-col w-[80%]'>
+                        <View className='flex flex-col w-[80%] relative'>
+                            <Text className='absolute z-10 right-2 top-0 font-bold text-[18px]'>...</Text>
                             <View className=' p-2 mt-1 rounded-lg  bg-gray-200'>
                                 <Text className='font-medium text-[16px]'>
-                                    {comment.user_name} - <Text className='text-[12px]'>{comment.createdAt}</Text>
+                                    {comment.user_name} - <Text className='text-[12px]'>{new Date(comment.createdAt).toLocaleString()}</Text>
                                 </Text>
                                 <Text>{comment.text}</Text>
                             </View>
