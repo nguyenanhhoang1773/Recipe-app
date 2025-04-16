@@ -3,12 +3,8 @@ const User = require("../../models/user");
 
 const login = async (req, res) => {
   try {
-<<<<<<< HEAD
+
     const { id_user, name, image_url, email, bio, favorites, recentlyLogin } = req.body;
-=======
-    const { id_user, name, image_url, email, favorites, recentlyLogin } =
-      req.body;
->>>>>>> b2389c02cbe54b5c835528794eda8aea957d1b55
     let user = await User.findOne({ id_user });
     if (!user) {
       user = new User({

@@ -18,9 +18,7 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
         createdAt: string;
         text: string;
     };
-    useEffect(() => {
-        getFeedback()
-    }, [])
+
     const [listFeedback, setListFeedback] = useState<Feedback[]>([]);
     const getFeedback = () => {
         const info = {
@@ -37,9 +35,9 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
         }
     }
 
+    getFeedback()
+
     const [text, setText] = useState('');
-
-
     function handleFeedback() {
         if (!text.trim()) {
             Alert.alert("Thông báo", "Không để trống dữ liệu");
