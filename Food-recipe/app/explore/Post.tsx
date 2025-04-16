@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,26 +12,40 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import images from "@/constant/images";
 import { useNavigation } from "@react-navigation/native";
+import { useUser } from "@clerk/clerk-expo";
+import axios from "axios";
 
-type USER_AVATAR = {
-  name?: string;
-  image?: any;
-  date?: string;
-};
+const POST = () => {
+  const { user } = useUser();
+  const navigation = useNavigation();
+  const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
-const POST = ({
-  name = "Suong",
-  image = images.pho,
-  date = "30/4",
-}: USER_AVATAR) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const navigation = useNavigation();
+  const [userData, setUserData] = useState<{ avatar?: string } | null>(null);
+
+  const displayName =
+    user?.fullName ||
+    user?.username ||
+    `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+    user?.emailAddresses[0]?.emailAddress ||
+    "Người dùng";
+
+  const today = new Date().toLocaleDateString("vi-VN");
+  const avatarUri =
+    userData?.avatar || user?.imageUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+  useEffect(() => {
+    if (!user?.id) return;
+    axios
+      .post(`${hostId}:80/api/getUser`, { id_user: user.id })
+      .then((res) => setUserData(res.data))
+      .catch((error) => console.error("Không thể tải thông tin người dùng:", error));
+  }, [user]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -39,62 +53,51 @@ const POST = ({
       quality: 1,
     });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setSelectedImage(uri);
-      console.log("Selected image URI:", uri);
-    } else {
-      Alert.alert("Thông báo", "Bạn chưa chọn ảnh nào.");
-    }
+    if (!result.canceled) setSelectedImage(result.assets[0].uri);
+    else Alert.alert("Thông báo", "Bạn chưa chọn ảnh nào.");
   };
 
   const uploadImageToCloudinary = async (imageUri: string) => {
-    const data = new FormData();
-    data.append("file", {
+    const formData = new FormData();
+    formData.append("file", {
       uri: imageUri,
       type: "image/jpeg",
       name: "upload.jpg",
     } as any);
-    data.append("upload_preset", "Food-recipe");
+    formData.append("upload_preset", "Food-recipe");
 
     try {
       const res = await fetch("https://api.cloudinary.com/v1_1/dry2myuau/image/upload", {
         method: "POST",
-        body: data,
+        body: formData,
       });
-
       const result = await res.json();
       return result.secure_url;
     } catch (error) {
-      console.log("Upload error", error);
+      console.log("Lỗi khi upload Cloudinary:", error);
       return null;
     }
   };
 
   const handlePost = async () => {
     if (!title || !description || !ingredients || !instructions) {
-      return Alert.alert("Thiếu thông tin", "Vui lòng điền đủ thông tin!");
+      return Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường bắt buộc.");
+    }
+
+    if (!user?.id) {
+      return Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
     }
 
     let imageUrl = "";
     if (selectedImage) {
       imageUrl = await uploadImageToCloudinary(selectedImage);
-      if (!imageUrl) {
-        return Alert.alert("Lỗi", "Tải ảnh lên thất bại.");
-        
-      }
+      if (!imageUrl) return Alert.alert("Lỗi", "Không thể tải ảnh lên.");
     }
 
-    // const postData = {
-    //   text: JSON.stringify({
-    //     name: title,
-    //     description,
-    //     ingredients,
-    //     instructions,
-    //   }),
-    //   image: imageUrl,
-    // };
     const postData = {
+      id_user: user.id,
+      userName: displayName,
+      userAvatar: user.imageUrl,
       name: title,
       description,
       ingredients,
@@ -103,36 +106,28 @@ const POST = ({
     };
 
     try {
-      console.log("Post data:", postData);
-      const response = await fetch("http://192.168.1.7:80/api/create-post", {
+      const response = await fetch(`${hostId}:80/api/addPost`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(postData),
       });
-      console.log("Response status:", response.status); // Log the HTTP status
-      const data = await response.json();
-      console.log("Response data:", data); // Log the response body
 
-      
-      if (data.success) {
-        Alert.alert("Thông báo", "Đăng bài thành công!");
+      const data = await response.json();
+
+      if (data.status || data.success) {
+        Alert.alert("Thành công", "Bài viết đã được đăng!");
         setTitle("");
         setDescription("");
         setIngredients("");
         setInstructions("");
         setSelectedImage(null);
+        
       } else {
-        Alert.alert("Lỗi", "Đăng bài thất bại.");
+        Alert.alert("Thất bại", data.message || "Đăng bài không thành công.");
       }
     } catch (err) {
-      console.log("Error posting:", err);
-      // console.log("Error name:", err.name);
-      // console.log("Error message:", err.message);
-      // console.log("Error stack:", err.stack);
-
-      Alert.alert("Lỗi", "Có lỗi xảy ra khi đăng bài.");
+      console.log("Lỗi gửi dữ liệu:", err);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi đăng bài.");
     }
   };
 
@@ -142,15 +137,15 @@ const POST = ({
       <View style={styles.headerBar}>
         <Ionicons name="arrow-back" size={24} color="black" onPress={() => navigation.goBack()} />
         <Text style={styles.headerText}>Thêm bài viết</Text>
-        <View style={{ width: 24 }} /> {/* Để cân header */}
+        <View style={{ width: 24 }} />
       </View>
 
       {/* User Info */}
       <View style={styles.userInfoWrapper}>
-        <Image source={image} style={styles.avatar} />
+        <Image source={{ uri: avatarUri }} style={styles.avatar} />
         <View style={{ marginLeft: 10 }}>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.date}>{date}</Text>
+          <Text style={styles.name}>{displayName}</Text>
+          <Text style={styles.date}>{today}</Text>
         </View>
       </View>
 

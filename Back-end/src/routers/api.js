@@ -12,26 +12,28 @@ const {
 } = require("../controllers/Feedback/Feedback.js");
 const { login, updateUser, getUser } = require("../controllers/User/User.js");
 const searchItems = require("../controllers/Search/Search.js");
-const { createPost } = require('../controllers/Post/Post');
+const { getPost, addPost, deletePost } = require('../controllers/Post/Post.js');
 
-//router User
+// ==== Router User ====
 router.post("/login", login);
 router.post("/getUser", getUser);
 router.post("/updateUser", updateUser);
 
-// router liked
+// ==== Router Liked ====
 router.get("/liked/:id_user", getLiked);
 router.post("/addLiked", addLiked);
-router.delete("/unLiked", unLiked);
+router.post("/unLiked", unLiked);
 
-// router feedback
+// ==== Router Feedback ====
 router.post("/getFeedback", getFeedback);
 router.post("/addFeedback", addFeedback);
 
-//router Search
+// ==== Router Search ====
 router.post("/search", searchItems);
 
-//  router Post
-router.post("/create-post", createPost);
+// ==== Router Post ====
+router.post("/getPost", getPost);
+router.post("/addPost", addPost);
+router.delete("/deletePost", deletePost);
 
 module.exports = router;

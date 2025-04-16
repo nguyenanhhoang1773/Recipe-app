@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 
 const Feedback = new Schema({
-    id_user: { type: String },
+    user_name: { type: String },
     id_recipe: { type: String },
     text: { type: String },
     image: { type: String },

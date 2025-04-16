@@ -12,6 +12,7 @@ import { usePathname } from "expo-router";
 import axios from "axios";
 
 const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
+console.log(hostId)
 const RootLayout = () => {
   const path = usePathname();
   const { user } = useUser();
@@ -41,9 +42,8 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Home
             </Text>
@@ -63,9 +63,8 @@ const RootLayout = () => {
           title: "My Favorite",
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Favorite
             </Text>
@@ -85,9 +84,8 @@ const RootLayout = () => {
           title: "My Scan",
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Scan
             </Text>
@@ -106,9 +104,8 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Explore
             </Text>
@@ -127,9 +124,8 @@ const RootLayout = () => {
         options={{
           tabBarLabel: ({ focused }) => (
             <Text
-              className={`${
-                focused ? "text-primary" : "text-text-primary"
-              } font-Inter-SemiBold`}
+              className={`${focused ? "text-primary" : "text-text-primary"
+                } font-Inter-SemiBold`}
             >
               Profile
             </Text>
