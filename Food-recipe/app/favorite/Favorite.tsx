@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
-import images from "@/constant/images";
+import images from "../../constant/images";
 import { Ionicons, AntDesign, MaterialCommunityIcons, } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -10,8 +10,9 @@ import { useClerk, useUser } from "@clerk/clerk-expo";
 import axios from "axios";
 
 const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
+
 interface Dish {
-  id: number;
+  id_recipe: string;
   name: string;
   image: any;
   description: string;
@@ -22,7 +23,7 @@ interface Dish {
 
 type RootStackParamList = {
   Favorite: undefined;
-  Details: { item: Dish };
+  ItemDetail: { item: Dish };
 };
 
 type FavoriteNavigationProp = NativeStackNavigationProp<
@@ -36,7 +37,7 @@ function Favorite() {
   const navigation = useNavigation<FavoriteNavigationProp>();
 
   const handlenavigation = (dish: Dish) => {
-    navigation.navigate('Details', { item: dish }); // Thêm tham số nếu cần
+    navigation.navigate('ItemDetail', { item: dish }); // Thêm tham số nếu cần
   };
   const { user } = useUser();
   const [liked, setLiked] = useState<Dish[]>([])
@@ -51,7 +52,6 @@ function Favorite() {
     axios.get(`${hostId}:80/api/liked/${user.id}`)
       .then((res) => {
         setLiked(res.data);
-        console.log("Danh sách mới:");
       });
   };
   const handleUnlike = (item: any) => {
@@ -60,7 +60,7 @@ function Favorite() {
       id_recipe: item.id_recipe
     }
 
-  
+
     Alert.alert(
       'Thông báo!',
       'Bạn có chắc chắn muốn xóa mục này không?',

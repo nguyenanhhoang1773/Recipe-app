@@ -6,6 +6,7 @@ const User = new Schema({
   name: { type: String },
   email: { type: String },
   image_url: { type: String },
+  bio: { type: String },
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Food" }],
   firstLogin: { type: Date, default: Date.now },
 });

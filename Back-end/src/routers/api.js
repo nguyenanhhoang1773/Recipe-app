@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const {
   getLiked,
   addLiked,
@@ -11,6 +12,8 @@ const {
 } = require("../controllers/Feedback/Feedback.js");
 const { login } = require("../controllers/User/User.js");
 const searchItems = require("../controllers/Search/Search.js");
+const { createPost } = require('../controllers/Post/Post');
+
 //router User
 router.post("/login", login);
 
@@ -25,5 +28,8 @@ router.post("/addFeedback", addFeedback);
 
 //router Search
 router.post("/search", searchItems);
+
+//  router Post
+router.post("/create-post", createPost);
 
 module.exports = router;
