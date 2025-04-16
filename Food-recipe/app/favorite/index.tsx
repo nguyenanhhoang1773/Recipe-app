@@ -8,11 +8,12 @@ const Stack = createNativeStackNavigator();
 
 function index() {
   return (
-    <Stack.Navigator>
-      {/* <Stack.Screen name="Feedback" component={Feedback}  options={{ headerShown: false }}/> */}
-      <Stack.Screen name="Favorite" component={Favorite} options={{ headerShown: false }} />
-      <Stack.Screen name="ItemDetail" component={ItemDetail} options={{ headerShown: false }} />
-    </Stack.Navigator>
+    // <Stack.Navigator>
+    //   {/* <Stack.Screen name="Feedback" component={Feedback}  options={{ headerShown: false }}/> */}
+    //   <Stack.Screen name="Favorite" component={Favorite} options={{ headerShown: false }} />
+    //   <Stack.Screen name="ItemDetail" component={ItemDetail} options={{ headerShown: false }} />
+    // </Stack.Navigator>
+    <Favorite/>
   );
 }
 

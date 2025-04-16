@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
 import images from "../../constant/images";
 import { Ionicons, AntDesign, MaterialCommunityIcons, } from "@expo/vector-icons";
@@ -8,6 +8,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import axios from "axios";
+import { Modal } from "react-native";
+import { useRouter } from 'expo-router';
+// import ItemDetail from '../../components/ItemDetail';
+
 
 const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
@@ -33,11 +37,23 @@ type FavoriteNavigationProp = NativeStackNavigationProp<
 
 
 function Favorite() {
-
+  const router = useRouter();
   const navigation = useNavigation<FavoriteNavigationProp>();
 
   const handlenavigation = (dish: Dish) => {
-    navigation.navigate('ItemDetail', { item: dish }); // Thêm tham số nếu cần
+    router.push({
+      pathname: '/favorite/itemdetail',
+      params: {
+        id_recipe: dish.id_recipe,
+        name: dish.name,
+        image: dish.image,
+        description: dish.description,
+        ingredients: dish.ingredients,
+        instructions: dish.instructions,
+      },
+    });
+    
+    // navigation.navigate('ItemDetail', { item: dish }); // Thêm tham số nếu cần
   };
   const { user } = useUser();
   const [liked, setLiked] = useState<Dish[]>([])
@@ -75,6 +91,7 @@ function Favorite() {
             axios.post(`${hostId}:80/api/unLiked`, info)
               .then((res) => {
                 getLikeds()
+                fakeLoadData()
                 console.log(res.data)
               })
         },
@@ -82,8 +99,41 @@ function Favorite() {
       { cancelable: false }
     );
   }
+
+  const [isLoading, setIsLoading] = useState(false);
+  const fakeLoadData = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      Alert.alert(
+        'Thông báo!',
+        'Bình luận của bạn về món ăn đã được thêm !!!',
+        [
+          {
+            text: 'OK',
+            onPress: () => console.log('Thêm thành công'),
+            style: 'cancel',
+          }
+
+        ],
+        { cancelable: false }
+      );
+    }, 3000);
+  };
   return (
+
     <ScrollView className="flex-1 bg-gray-100">
+      {
+        isLoading &&
+        <Modal visible={true} transparent animationType="fade">
+          <View className="flex-1 justify-center items-center bg-black/60">
+            <View className="bg-zinc-800 px-6 py-4 rounded-xl items-center">
+              <ActivityIndicator size="large" color="#fff" />
+              <Text className="text-white mt-2 text-base">Đang tải...</Text>
+            </View>
+          </View>
+        </Modal>
+      }
       <View className="p-4">
         <Text className="text-2xl font-bold mb-4">Món Ăn Yêu Thích</Text>
         {liked.map((data, index) => (
