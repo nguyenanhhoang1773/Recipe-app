@@ -122,7 +122,7 @@ const Profile = () => {
 
       const json = await res.json();
       const secureUrl = json.secure_url;
-      console.log("Uploaded to Cloudinary:", secureUrl);
+      console.log("Đã tải lên Cloudinary:", secureUrl);
       return secureUrl;
     } catch (error) {
       console.error("Lỗi khi upload lên Cloudinary:", error);
@@ -175,7 +175,7 @@ const Profile = () => {
     }
     try {
       const cloudUrl = await uploadToCloudinary(uri);
-      await axios.patch(`${hostId}:80/api/updateUser`, {
+      await axios.post(`${hostId}:80/api/updateUser`, {
         id_user: user.id,
         image_url: cloudUrl,
       });
@@ -216,7 +216,7 @@ const Profile = () => {
       setModalVisible(false);
       setBio(trimmedBio);
   
-      const res = await axios.patch<{ user: UserData }>(`${hostId}:80/api/updateUser`, {
+      const res = await axios.post<{ user: UserData }>(`${hostId}:80/api/updateUser`, {
         id_user: user.id,
         bio: trimmedBio,
       });

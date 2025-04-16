@@ -17,7 +17,7 @@ const { createPost } = require('../controllers/Post/Post');
 //router User
 router.post("/login", login);
 router.post("/getUser", getUser);
-router.patch("/updateUser", updateUser);
+router.post("/updateUser", updateUser);
 
 // router liked
 router.get("/liked/:id_user", getLiked);
