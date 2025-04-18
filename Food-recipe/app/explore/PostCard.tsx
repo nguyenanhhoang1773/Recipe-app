@@ -23,6 +23,10 @@ type PostDataProps = {
   image: string;
   description: string;
   instructions: string;
+  id_category?: {
+    _id?: string;
+    type?: string;
+  };
   createdAt: string;
   onDelete?: () => void;
 };
@@ -35,8 +39,11 @@ const PostCard = ({
   description,
   instructions,
   createdAt,
-  onDelete = () => {},
+  id_category,
+  onDelete = () => { },
 }: PostDataProps) => {
+  console.log("Danh mục:", id_category);
+
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [showOptions, setShowOptions] = useState(false);
   const [showFullInstructions, setShowFullInstructions] = useState(false);
@@ -88,7 +95,9 @@ const PostCard = ({
       {/* Thông tin món ăn */}
       <Text style={styles.foodTitle}>{name}</Text>
       <Text style={styles.description}> {description}</Text>
-
+      <Text style={styles.category}>
+        <Text style={{ fontWeight: "bold" }}>Phương pháp chế biến: {id_category?.type || "không rõ"}</Text> 
+      </Text>
       <Text
         style={styles.instructions}
         numberOfLines={showFullInstructions ? undefined : 1}
@@ -217,5 +226,11 @@ const styles = StyleSheet.create({
   menuItem: {
     paddingVertical: 6,
     fontSize: 16,
+  },
+  category: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 4,
+    fontStyle: "italic",
   },
 });

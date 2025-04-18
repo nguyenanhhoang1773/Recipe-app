@@ -11,6 +11,7 @@ const {
   addFeedback,
 } = require("../controllers/Feedback/Feedback.js");
 const { login, updateUser, getUser } = require("../controllers/User/User.js");
+const { getCategory, addCategory } = require("../controllers/Category/Category.js");
 const searchItems = require("../controllers/Search/Search.js");
 const { getPost, addPost, deletePost } = require('../controllers/Post/Post.js');
 
@@ -18,6 +19,10 @@ const { getPost, addPost, deletePost } = require('../controllers/Post/Post.js');
 router.post("/login", login);
 router.post("/getUser", getUser);
 router.post("/updateUser", updateUser);
+
+// ==== Router Category ====
+router.get("/getCategory", getCategory);
+router.post("/addCategory", addCategory);
 
 // ==== Router Liked ====
 router.get("/liked/:id_user", getLiked);

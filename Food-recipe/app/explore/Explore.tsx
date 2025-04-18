@@ -28,6 +28,10 @@ type Post = {
   image: string;
   description: string;
   instructions: string;
+  id_category?: {
+    _id?: string;
+    type?: string;
+  };
   createdAt: string;
 };
 
@@ -97,6 +101,7 @@ const Explore = () => {
       image={item.image}
       description={item.description}
       instructions={item.instructions}
+      id_category={item.id_category}
       createdAt={item.createdAt}
       onDelete={() => handleDeletePost(item._id)}
     />

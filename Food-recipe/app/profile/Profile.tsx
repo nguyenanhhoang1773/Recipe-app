@@ -62,7 +62,6 @@ const Profile = () => {
       Alert.alert("Thông báo!", message, [{ text: "OK" }]);
     }, 3000);
   };
-
   const fetchUserData = async () => {
     if (!user?.id) {
       console.log("Không có user.id");
@@ -95,6 +94,7 @@ const Profile = () => {
     if (user) {
       fetchUserData();
       fetchUserPost();
+
     }
   }, [user]);
 
@@ -274,7 +274,7 @@ const Profile = () => {
     ]);
   };
 
-  return (
+  return(
     <View className="flex-1 bg-gray-100">
       {
         isLoading &&
@@ -449,9 +449,8 @@ const Profile = () => {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-
     </View>
   );
 };
 
-export default Profile;
+export default Profile
