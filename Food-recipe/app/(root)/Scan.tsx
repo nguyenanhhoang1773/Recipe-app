@@ -50,10 +50,14 @@ const Scan = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="bg-white h-full">
+      <View className="p-3" style={{ backgroundColor: "#0B9A61" }}>
+        <Text className="text-2xl font-bold text-white" >Nhận diện thực phẩm </Text>
+      </View>
+
       {selectedImage && <Image source={{ uri: selectedImage }} style={styles.image} />}
-      <Text style={styles.title}>Chọn Hình Ảnh</Text>
-      <View style={styles.buttonContainer}>
+
+      <View className=' m-4 gap-2'>
         <TouchableOpacity style={styles.button} onPress={takePhotoAsync}>
           <Text style={styles.buttonText}>Chụp Ảnh</Text>
         </TouchableOpacity>
@@ -66,23 +70,9 @@ const Scan = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
+  
   button: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#0B9A61',
     padding: 15,
     borderRadius: 8,
     marginHorizontal: 10,

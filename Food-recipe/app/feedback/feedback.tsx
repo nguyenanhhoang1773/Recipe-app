@@ -92,7 +92,7 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
         alert('Đã thích bình luận này!');
     }
     return (
-        <View>
+        <View className='bg-white'>
             {
                 isLoading &&
                 <Modal visible={true} transparent animationType="none">
@@ -105,7 +105,7 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
                 </Modal>
             }
 
-            <View className='p-2 my-1  bg-gray-200 rounded-lg'>
+            <View className='p-2 my-1  rounded-lg ' style={{ backgroundColor: 'rgba(0, 188, 0, 0.1)' }}>
                 {/* <Spinner visible={isLoading} textContent="Loading..." textStyle={{ color: '#FFF' }} /> */}
 
                 <Text className='font-bold text-[20px]'>
@@ -120,7 +120,7 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
                 <View className='flex justify-end flex-row'>
                     <Text className='p-2 bg-red-400 text-white rounded-lg font-bold m-1' onPress={() => setText('')}>Hủy</Text>
 
-                    <Text className='p-2 bg-green-400 text-white rounded-lg font-bold m-1' onPress={handleFeedback}>Nhận xét</Text>
+                    <Text className='p-2 text-white rounded-lg font-bold m-1' style={{ backgroundColor: '#0B9A61' }} onPress={handleFeedback}>Nhận xét</Text>
                 </View>
             </View>
 
@@ -129,13 +129,14 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
                 <Text className='font-bold text-[20px] my-1'>
                     Tất cả nhận xét
                 </Text>
+                {listFeedback.length === 0 && <Text className='text-center'>Chưa có đánh giá nào về công thức này!!!</Text>}
                 {listFeedback.map((comment, index) => (
                     <View key={index} className=' flex flex-row p-1'>
 
                         <Image source={images.andanh} className='rounded-full h-[50px] w-[50px] mr-2' />
                         <View className='flex flex-col w-[80%] relative'>
                             <Text className='absolute z-10 right-2 top-0 font-bold text-[18px]'>...</Text>
-                            <View className=' p-2 mt-1 rounded-lg  bg-gray-200'>
+                            <View className=' p-2 mt-1 rounded-lg ' style={{ backgroundColor: 'rgba(0, 188, 0, 0.1)' }}>
                                 <Text className='font-medium text-[16px]'>
                                     {comment.user_name} - <Text className='text-[12px]'>{new Date(comment.createdAt).toLocaleString()}</Text>
                                 </Text>

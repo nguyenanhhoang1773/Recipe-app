@@ -18,12 +18,12 @@ export default function ItemDetail() {
   } = useLocalSearchParams();
 
   return (
-    <View className="p-2 h-full">
+    <View className="p-1 h-full bg-white">
       <Ionicons
-        className="absolute left-1 top-1 z-10"
+        className="absolute left-2 top-2 z-10"
         name="arrow-back-circle-outline"
-        color="#999999"
-        size={30}
+        color="#0B9A61"
+        size={35}
         onPress={() => router.back()}
       />
 
@@ -33,9 +33,9 @@ export default function ItemDetail() {
           className="w-full h-[180px] rounded-md mb-2"
         />
 
-        <View>
+        <View className='p-2'>
           <Text className="font-bold text-[20px]">{name}</Text>
-          <Text className="text-[18px] font-medium">{description}</Text>
+          <Text className="text-[14px] font-medium ml-2">{description}</Text>
 
           <Text className="mt-2 font-bold text-[16px]">Nguyên liệu:</Text>
           <Text className="ml-2 italic text-gray-700">{ingredients}</Text>

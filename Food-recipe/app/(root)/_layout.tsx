@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StatusBar } from "react-native";
 import React, { useEffect } from "react";
 import { Redirect, Tabs } from "expo-router";
 import {
@@ -37,6 +37,7 @@ const RootLayout = () => {
   if (!user) return <Redirect href={"/(auth)/sign-in"} />;
   return (
     <Tabs screenOptions={{ headerShown: false }}>
+
       <Tabs.Screen
         name="index"
         options={{

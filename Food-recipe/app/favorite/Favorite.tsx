@@ -10,6 +10,8 @@ import { useClerk, useUser } from "@clerk/clerk-expo";
 import axios from "axios";
 import { Modal } from "react-native";
 import { useRouter } from 'expo-router';
+import { StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 // import ItemDetail from '../../components/ItemDetail';
 
 
@@ -38,7 +40,6 @@ type FavoriteNavigationProp = NativeStackNavigationProp<
 
 function Favorite() {
   const router = useRouter();
-  const navigation = useNavigation<FavoriteNavigationProp>();
 
   const handlenavigation = (dish: Dish) => {
     router.push({
@@ -52,7 +53,7 @@ function Favorite() {
         instructions: dish.instructions,
       },
     });
-    
+
     // navigation.navigate('ItemDetail', { item: dish }); // Thêm tham số nếu cần
   };
   const { user } = useUser();
@@ -107,7 +108,7 @@ function Favorite() {
       setIsLoading(false);
       Alert.alert(
         'Thông báo!',
-        'Bình luận của bạn về món ăn đã được thêm !!!',
+        'Đã bỏ yêu thích công thức này !!!',
         [
           {
             text: 'OK',
@@ -121,33 +122,44 @@ function Favorite() {
     }, 3000);
   };
   return (
-
-    <ScrollView className="flex-1 bg-gray-100">
-      {
-        isLoading &&
-        <Modal visible={true} transparent animationType="fade">
-          <View className="flex-1 justify-center items-center bg-black/60">
-            <View className="bg-zinc-800 px-6 py-4 rounded-xl items-center">
-              <ActivityIndicator size="large" color="#fff" />
-              <Text className="text-white mt-2 text-base">Đang tải...</Text>
-            </View>
-          </View>
-        </Modal>
-      }
-      <View className="p-4">
-        <Text className="text-2xl font-bold mb-4">Món Ăn Yêu Thích</Text>
-        {liked.map((data, index) => (
-          <TouchableOpacity key={index} className="bg-gray-300 rounded-lg p-4 mb-4 " onPress={() => handlenavigation(data)} >
-            <View className="relative">
-              <Image source={{ uri: data.image }} className="w-full h-40 rounded-md mb-2  " />
-              <Ionicons className="absolute right-1 top-1" name={"heart"} color="#ff0000" size={30} onPress={() => { handleUnlike(data) }} />
-            </View>
-            <Text className="text-lg font-semibold mb-1">{data.name}</Text>
-            <Text className="text-gray-600">{data.description}</Text>
-          </TouchableOpacity>
-        ))}
+    <View className="bg-white h-full">
+      <View className="p-3" style={{ backgroundColor: "#0B9A61" }}>
+        <Text className="text-2xl font-bold text-white" >Món Ăn Yêu Thích</Text>
       </View>
-    </ScrollView>
+      <ScrollView className=" bg-white">
+        {
+          isLoading &&
+          <Modal visible={true} transparent animationType="fade">
+            <View className="flex-1 justify-center items-center bg-black/60">
+              <View className="bg-zinc-800 px-6 py-4 rounded-xl items-center">
+                <ActivityIndicator size="large" color="#fff" />
+                <Text className="text-white mt-2 text-base">Đang tải...</Text>
+              </View>
+            </View>
+          </Modal>
+        }
+
+        <View className="p-4 ">
+          {liked.map((data, index) => (
+            <TouchableOpacity key={index} className="rounded-lg p-2 mb-4 " style={{ backgroundColor: 'rgba(0, 188, 0, 0.1)' }} onPress={() => handlenavigation(data)} >
+              <View className="flex-row justify-between gap-2 relative">
+                <Ionicons className="absolute right-0 top-0" name={"heart"} color="#ff0000" size={20} onPress={() => { handleUnlike(data) }} />
+
+                <View className=" w-[40%]">
+                  <Image source={{ uri: data.image }} className="w-full h-40 rounded-md mb-2  " />
+                </View>
+                <View className=" w-[55%]">
+                  <Text className="text-lg font-semibold mb-1">{data.name}</Text>
+                  <Text className="text-gray-600" numberOfLines={6} ellipsizeMode="tail">
+                    {data.description}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
