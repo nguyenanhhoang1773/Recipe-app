@@ -22,8 +22,10 @@ import cheese from "@/assets/images/cheese.jpg";
 import logoLogIn from "@/assets/images/logo.png";
 import github from "@/assets/images/github.png";
 import banhmi from "@/assets/images/banhmi.jpg";
+import chien from "@/assets/images/Chien.jpg";
 
 export default {
+  chien,
   banhmi,
   github,
   logoLogIn,
