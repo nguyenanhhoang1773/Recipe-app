@@ -17,7 +17,7 @@ import PostCard from "./PostCard";
 
 type RootStackParamList = {
   Explore: undefined;
-  POST: { onPostSuccess?: () => void };
+  POST: { post?: Post; onPostSuccess?: () => void };
 };
 
 type Post = {
@@ -25,9 +25,9 @@ type Post = {
   userName: string;
   userAvatar: string;
   name: string;
-  image: string;
   description: string;
   instructions: string;
+  list_images: string[];
   id_category?: {
     _id?: string;
     type?: string;
@@ -98,18 +98,23 @@ const Explore = () => {
       displayName={item.userName}
       avatar={item.userAvatar}
       name={item.name}
-      image={item.image}
       description={item.description}
       instructions={item.instructions}
+      list_images={item.list_images}
       id_category={item.id_category}
       createdAt={item.createdAt}
       onDelete={() => handleDeletePost(item._id)}
+      onEdit={() =>
+        navigation.navigate("POST", {
+          post: item, // truyền dữ liệu để chỉnh sửa
+          onPostSuccess: fetchPosts, // reload lại danh sách sau khi update
+        })
+      }
     />
   );
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Công thức của tôi</Text>
         <TouchableOpacity
@@ -123,7 +128,6 @@ const Explore = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Danh sách bài viết */}
       {loading ? (
         <ActivityIndicator size="large" style={styles.loading} />
       ) : posts.length === 0 ? (

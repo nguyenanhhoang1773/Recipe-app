@@ -13,7 +13,7 @@ const {
 const { login, updateUser, getUser } = require("../controllers/User/User.js");
 const { getCategory, addCategory } = require("../controllers/Category/Category.js");
 const searchItems = require("../controllers/Search/Search.js");
-const { getPost, addPost, deletePost } = require('../controllers/Post/Post.js');
+const { getPost, addPost, deletePost, updatePost} = require('../controllers/Post/Post.js');
 
 // ==== Router User ====
 router.post("/login", login);
@@ -40,5 +40,6 @@ router.post("/search", searchItems);
 router.post("/getPost", getPost);
 router.post("/addPost", addPost);
 router.delete("/deletePost", deletePost);
+router.put("/updatePost", updatePost);
 
 module.exports = router;

@@ -4,57 +4,42 @@ import {
   Text,
   StyleSheet,
   Image,
-  Alert,
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
-type RootStackParamList = {
-  Explore: undefined;
-  POST: undefined;
-};
+import Swiper from "react-native-swiper";
 
 type PostDataProps = {
   displayName: string;
   avatar: string;
   name: string;
-  image: string;
   description: string;
   instructions: string;
+  list_images: string[];
   id_category?: {
     _id?: string;
     type?: string;
   };
   createdAt: string;
   onDelete?: () => void;
+  onEdit?: () => void; 
 };
 
 const PostCard = ({
   displayName,
   avatar,
   name,
-  image,
   description,
   instructions,
+  list_images,
   createdAt,
   id_category,
-  onDelete = () => { },
+  onDelete = () => {},
+  onEdit = () => {},
 }: PostDataProps) => {
-  console.log("Danh mục:", id_category);
-
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [showOptions, setShowOptions] = useState(false);
   const [showFullInstructions, setShowFullInstructions] = useState(false);
   const shouldShowToggle = instructions.length > 100;
-
-  const handleDelete = () => {
-    Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xóa bài này?", [
-      { text: "Hủy", style: "cancel" },
-      { text: "Xóa", style: "destructive", onPress: onDelete },
-    ]);
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -80,35 +65,68 @@ const PostCard = ({
       {/* Menu tùy chọn */}
       {showOptions && (
         <View style={styles.menu}>
-          <TouchableOpacity onPress={() => navigation.navigate("POST")}>
+          <TouchableOpacity
+            onPress={() => {
+              setShowOptions(false);
+              onEdit(); 
+            }}
+          >
             <Text style={styles.menuItem}>Chỉnh sửa</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete}>
+          <TouchableOpacity
+            onPress={() => {
+              setShowOptions(false);
+              onDelete(); 
+            }}
+          >
             <Text style={[styles.menuItem, { color: "red" }]}>Xóa</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Ảnh món ăn */}
-      <Image source={{ uri: image }} style={styles.img} />
+      {/* Hình ảnh */}
+      {list_images?.length > 0 &&
+        (list_images.length > 1 ? (
+          <Swiper style={styles.swiper} showsPagination autoplay>
+            {list_images.map((img, index) => (
+              <Image
+                key={index}
+                source={{ uri: img }}
+                style={styles.img}
+                resizeMode="cover"
+              />
+            ))}
+          </Swiper>
+        ) : (
+          <Image
+            source={{ uri: list_images[0] }}
+            style={styles.img}
+            resizeMode="cover"
+          />
+        ))}
 
       {/* Thông tin món ăn */}
       <Text style={styles.foodTitle}>{name}</Text>
-      <Text style={styles.description}> {description}</Text>
+      <Text style={styles.description}>{description}</Text>
       <Text style={styles.category}>
-        <Text style={{ fontWeight: "bold" }}>Phương pháp chế biến: {id_category?.type || "không rõ"}</Text> 
+        <Text style={{ fontWeight: "bold" }}>
+          Phương pháp chế biến: {id_category?.type || "không rõ"}
+        </Text>
       </Text>
+
       <Text
         style={styles.instructions}
         numberOfLines={showFullInstructions ? undefined : 1}
       >
-        <Text style={{ fontWeight: 'bold', fontSize: 15 }}>Công thức:</Text>
-        {'\n'}
+        <Text style={{ fontWeight: "bold", fontSize: 15 }}>Công thức:</Text>
+        {"\n"}
         {instructions}
       </Text>
 
       {shouldShowToggle && (
-        <TouchableOpacity onPress={() => setShowFullInstructions(!showFullInstructions)}>
+        <TouchableOpacity
+          onPress={() => setShowFullInstructions(!showFullInstructions)}
+        >
           <Text style={styles.toggleText}>
             {showFullInstructions ? "Thu gọn" : "Xem thêm"}
           </Text>
@@ -168,11 +186,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "gray",
   },
+  swiper: {
+    height: 300,
+    marginTop: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
   img: {
     width: "100%",
     height: 300,
     borderRadius: 10,
-    marginTop: 10,
     resizeMode: "cover",
   },
   foodTitle: {

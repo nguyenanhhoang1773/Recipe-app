@@ -15,24 +15,44 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { useUser } from "@clerk/clerk-expo";
 import axios from "axios";
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+type PostType = {
+  _id: string;
+  name: string;
+  description: string;
+  ingredients: string;
+  instructions: string;
+  list_images: string[];
+  id_category: {
+    _id: string;
+    type: string;
+  };
+};
+
+type RootStackParamList = {
+  POST: { post?: PostType };
+};
+
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const POST = () => {
   const { user } = useUser();
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, "POST">>();
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
+
+  const postToEdit = route.params?.post || null;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -51,57 +71,67 @@ const POST = () => {
 
   useEffect(() => {
     if (!user?.id) return;
-    axios
-      .post(`${hostId}:80/api/getUser`, { id_user: user.id })
-      .then((res) => setUserData(res.data))
-      .catch((error) => console.error("Không thể tải thông tin người dùng:", error));
-
-    axios
-      .get(`${hostId}:80/api/getCategory`)
-      .then((res) => setCategories(res.data as any))
-      .catch((err) => console.error("Lỗi khi tải danh mục:", err));
+    axios.post(`${hostId}:80/api/getUser`, { id_user: user.id }).then((res) => setUserData(res.data));
+    axios.get(`${hostId}:80/api/getCategory`).then((res) => setCategories(res.data as any));
   }, [user]);
 
-  const pickImage = async () => {
+  useEffect(() => {
+    if (postToEdit) {
+      setTitle(postToEdit.name);
+      setDescription(postToEdit.description);
+      setIngredients(postToEdit.ingredients);
+      setInstructions(postToEdit.instructions);
+      setSelectedCategory(postToEdit.id_category?._id || "");
+      setSelectedImages(postToEdit.list_images || []);
+    }
+  }, [postToEdit]);
+
+  const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
       quality: 1,
     });
-    if (!result.canceled) setSelectedImage(result.assets[0].uri);
-    else Alert.alert("Thông báo", "Bạn chưa chọn ảnh nào.");
+    if (!result.canceled) {
+      const uris = result.assets.map((a) => a.uri);
+      setSelectedImages((prev) => [...prev, ...uris]);
+    } else {
+      Alert.alert("Thông báo", "Bạn chưa chọn ảnh nào.");
+    }
   };
 
-  const uploadImageToCloudinary = async (imageUri: string) => {
-    const formData = new FormData();
-    formData.append("file", {
-      uri: imageUri,
-      type: "image/jpeg",
-      name: "upload.jpg",
-    } as any);
-    formData.append("upload_preset", "Food-recipe");
-    try {
+  const uploadMultipleImages = async () => {
+    const urls: string[] = [];
+    for (const uri of selectedImages) {
+      const formData = new FormData();
+      formData.append("file", {
+        uri,
+        type: "image/jpeg",
+        name: "upload.jpg",
+      } as any);
+      formData.append("upload_preset", "Food-recipe");
       const res = await fetch("https://api.cloudinary.com/v1_1/dry2myuau/image/upload", {
         method: "POST",
         body: formData,
       });
-      const result = await res.json();
-      return result.secure_url;
-    } catch (error) {
-      console.log("Lỗi khi upload Cloudinary:", error);
-      return null;
+      const data = await res.json();
+      urls.push(data.secure_url);
     }
+    return urls;
   };
 
   const handlePost = async () => {
-    if (!title || !description || !ingredients || !instructions || !selectedCategory) {
+    if (!title || !description || !ingredients || !instructions || !selectedCategory)
       return Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường bắt buộc.");
-    }
     if (!user?.id) return Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
-    let imageUrl = "";
-    if (selectedImage) {
-      imageUrl = await uploadImageToCloudinary(selectedImage);
-      if (!imageUrl) return Alert.alert("Lỗi", "Không thể tải ảnh lên.");
+
+    let list_images: string[] = [];
+    if (!postToEdit && selectedImages.length > 0) {
+      list_images = await uploadMultipleImages();
+    } else {
+      list_images = selectedImages;
     }
+
     const postData = {
       id_user: user.id,
       userName: displayName,
@@ -110,31 +140,38 @@ const POST = () => {
       description,
       ingredients,
       instructions,
-      image: imageUrl,
+      list_images,
       id_category: selectedCategory,
     };
-    console.log("Dữ liệu gửi đến server:", postData);
+
     try {
-      const response = await fetch(`${hostId}:80/api/addPost`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postData),
-      });
-      const data = await response.json();
-      if (data.status || data.success) {
-        Alert.alert("Thành công", "Bài viết đã được đăng!");
-        setTitle("");
-        setDescription("");
-        setIngredients("");
-        setInstructions("");
-        setSelectedCategory("");
-        setSelectedImage(null);
+      if (postToEdit) {
+        const response = await fetch(`${hostId}:80/api/updatePost`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...postData, id: postToEdit._id }),
+        });
+        const data = await response.json();
+        if (data.post) Alert.alert("Cập nhật thành công", "Bài viết đã được cập nhật!");
       } else {
-        Alert.alert("Thất bại", data.message || "Đăng bài không thành công.");
+        const response = await fetch(`${hostId}:80/api/addPost`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(postData),
+        });
+        const data = await response.json();
+        if (data.status || data.success) Alert.alert("Thành công", "Bài viết đã được đăng!");
       }
+
+      setTitle("");
+      setDescription("");
+      setIngredients("");
+      setInstructions("");
+      setSelectedCategory("");
+      setSelectedImages([]);
+      navigation.goBack();
     } catch (err) {
-      console.log("Lỗi gửi dữ liệu:", err);
-      Alert.alert("Lỗi", "Đã xảy ra lỗi khi đăng bài.");
+      Alert.alert("Lỗi", "Đã xảy ra lỗi khi gửi dữ liệu.");
     }
   };
 
@@ -142,7 +179,7 @@ const POST = () => {
     <ScrollView style={styles.container}>
       <View style={styles.headerBar}>
         <Ionicons name="arrow-back" size={24} color="black" onPress={() => navigation.goBack()} />
-        <Text style={styles.headerText}>Thêm bài viết</Text>
+        <Text style={styles.headerText}>{postToEdit ? "Chỉnh sửa bài viết" : "Thêm bài viết"}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -199,15 +236,31 @@ const POST = () => {
         <TextInput placeholder="Các bước chế biến" value={instructions} onChangeText={setInstructions} multiline style={[styles.input, { height: 120 }]} />
       </View>
 
-      {selectedImage && <Image source={{ uri: selectedImage }} style={styles.preview} />}
+      <View style={styles.imageContainer}>
+        {selectedImages.map((img, idx) => (
+          <View key={idx} style={styles.imageWrapper}>
+            <Image source={{ uri: img }} style={styles.preview} />
+            <TouchableOpacity
+              style={styles.removeIcon}
+              onPress={() => {
+                const updated = [...selectedImages];
+                updated.splice(idx, 1);
+                setSelectedImages(updated);
+              }}
+            >
+              <Ionicons name="close-circle-sharp" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
 
-      <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+      <TouchableOpacity style={styles.imagePicker} onPress={pickImages}>
         <Feather name="image" size={20} color="#007bff" />
-        <Text style={styles.imagePickerText}> Chọn hình ảnh</Text>
+        <Text style={styles.imagePickerText}> Chọn nhiều hình ảnh</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={handlePost}>
-        <Text style={styles.buttonText}>Đăng bài</Text>
+        <Text style={styles.buttonText}>{postToEdit ? "Cập nhật bài viết" : "Đăng bài"}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -274,11 +327,27 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#333",
   },
-  preview: {
+  imageContainer: {
+    flexDirection: "column",
+    gap: 10,
+    marginBottom: 12,
+  },
+  imageWrapper: {
+    position: "relative",
     width: "100%",
     height: 180,
+  },
+  preview: {
+    width: "100%",
+    height: "100%",
     borderRadius: 14,
-    marginBottom: 20,
+  },
+  removeIcon: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "fff",
+    borderRadius: 20,
   },
   imagePicker: {
     flexDirection: "row",
