@@ -102,7 +102,7 @@ const Home = () => {
                 name="location"
               />
               <Text className="font-Inter-Medium text-xl mx-1">
-                {address.name}
+                {address?.name}
               </Text>
               <Feather
                 size={20}
