@@ -11,18 +11,23 @@ const {
   addFeedback,
 } = require("../controllers/Feedback/Feedback.js");
 const { login, updateUser, getUser } = require("../controllers/User/User.js");
-const { getCategory, addCategory } = require("../controllers/Category/Category.js");
+const {
+  getCategory,
+  addCategory,
+} = require("../controllers/Category/Category.js");
 const searchItems = require("../controllers/Search/Search.js");
-<<<<<<< HEAD
 const { addRecipe, getRecipes } = require("../controllers/Recipe/Recipe.js");
 //router User
 router.post("/login", login);
 //router Recipes
 router.post("/addRecipe", addRecipe);
 router.get("/getRecipes", getRecipes);
-=======
-const { getPost, addPost, deletePost, updatePost} = require('../controllers/Post/Post.js');
->>>>>>> c0e5553c6cf5d7fe11e937d984c7d580e068be26
+const {
+  getPost,
+  addPost,
+  deletePost,
+  updatePost,
+} = require("../controllers/Post/Post.js");
 
 // ==== Router User ====
 router.post("/login", login);

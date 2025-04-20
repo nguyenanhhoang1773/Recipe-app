@@ -24,17 +24,21 @@ import { Redirect, router } from "expo-router";
 import axios from "axios";
 import "react-native-get-random-values";
 import { Recipe } from "@/type";
-import { windowHeight, windowWidth } from "@/app-example/constants/constant";
+import { windowHeight, windowWidth } from "@/constant/constant";
 const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 import * as Location from "expo-location";
 
 const Home = () => {
   const handlePressRecipe = (recipe: Recipe) => {
     router.push({
-      pathname: "/favorite/Details",
+      pathname: "/favorite/itemdetail",
       params: {
-        item: JSON.stringify(recipe),
-        isExpoRouter: 1,
+        id_recipe: 1,
+        name: recipe.title,
+        image: recipe.image,
+        description: recipe.description,
+        ingredients: recipe.ingredients,
+        instructions: recipe.formula,
       },
     });
   };

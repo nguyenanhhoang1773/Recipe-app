@@ -19,7 +19,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import images from "@/constant/images";
 import { Recipe } from "@/type";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { windowHeight, windowWidth } from "@/app-example/constants/constant";
+import { windowHeight, windowWidth } from "@/constant/constant";
 
 const commentsData = [
   {
