@@ -11,7 +11,6 @@ import ingredients from "@/assets/images/ingredients.png";
 import clock from "@/assets/images/clock.png";
 import wallpaper from "@/assets/images/wallpaper.jpg";
 import google from "@/assets/images/google.png";
-
 import vegetable from "@/assets/images/rausach.jpg";
 import andanh from "@/assets/images/andanh.jpg";
 import logo from "@/assets/images/react-logo.png";
@@ -22,8 +21,12 @@ import cheese from "@/assets/images/cheese.jpg";
 import logoLogIn from "@/assets/images/logo.png";
 import github from "@/assets/images/github.png";
 import banhmi from "@/assets/images/banhmi.jpg";
+import kfcThumbnail from "@/assets/images/kfcThumbnail.jpg";
+import McDonaldThumbnail from "@/assets/images/McDonaldThumbnail.png";
 
-export default {
+const images: Record<string, any> = {
+  kfcThumbnail,
+  McDonaldThumbnail,
   banhmi,
   github,
   logoLogIn,
@@ -48,3 +51,4 @@ export default {
   cachua,
   cheese,
 };
+export default images;

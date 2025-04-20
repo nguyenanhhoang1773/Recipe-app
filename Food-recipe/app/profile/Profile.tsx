@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Dimensions,
 } from "react-native";
 import images from "@/constant/images";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
@@ -13,6 +14,10 @@ import React, { useLayoutEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useUser, useClerk } from "@clerk/clerk-expo";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 type TabParamList = {
   Profile: undefined;
   Favorite: undefined;
@@ -21,6 +26,7 @@ type TabParamList = {
 };
 
 const Profile = () => {
+  const insets = useSafeAreaInsets();
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigation = useNavigation<NativeStackNavigationProp<TabParamList>>();
@@ -39,7 +45,7 @@ const Profile = () => {
   return (
     <View className="flex-1 bg-gray-100">
       {/* Ảnh nền */}
-      <View className="relative h-52">
+      <View className={`relative h-52`}>
         <Image
           source={images.thumbnail}
           className="w-full h-full"
@@ -50,7 +56,10 @@ const Profile = () => {
           style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32 }}
         />
         <View className="absolute w-full px-2">
-          <View className="flex-row justify-between items-center px-6 pt-6">
+          <View
+            style={{ paddingTop: insets.top }}
+            className="flex-row justify-between items-center px-6 pt-6 "
+          >
             <Text className="text-2xl font-semibold">My profile</Text>
             <MaterialIcons
               name="settings"

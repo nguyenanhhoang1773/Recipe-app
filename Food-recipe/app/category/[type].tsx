@@ -18,11 +18,24 @@ import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
 import data from "@/constant/data";
 import { LinearGradient } from "expo-linear-gradient";
 import colors from "@/constant/colors";
+import { Recipe } from "@/type";
+import axios from "axios";
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
+const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 const Category = () => {
   const { user } = useUser();
-
+  const [recipes, setRecipes] = useState<Array<Recipe>>([]);
+  useEffect(() => {
+    axios
+      .get(`${hostId}:80/api/getRecipes`)
+      .then(function (response) {
+        setRecipes(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
   return (
     <SafeAreaView>
       <ScrollView className="px-7 pt-5">
@@ -103,7 +116,7 @@ const Category = () => {
           </Text>
         </View>
         <FlatList
-          data={data.recipe.slice().reverse()}
+          data={recipes}
           className="mt-4 pb-5"
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -117,7 +130,7 @@ const Category = () => {
             >
               <Image
                 className="w-full h-full rounded-3xl"
-                source={item.source}
+                source={images[item.image]}
               />
               <LinearGradient
                 colors={["transparent", "rgba(0,0,0,0.6)"]}
@@ -147,14 +160,14 @@ const Category = () => {
                     source={images.clock}
                   />
                   <Text className="ml-2 text-sm text-white font-Inter-Light">
-                    {item.time}
+                    {item.duration}
                   </Text>
                   <Image
                     className="w-4 h-4 ml-2"
                     source={images.ingredients}
                   />
                   <Text className="ml-2 text-sm text-white font-Inter-Light">
-                    {item.ingredients}
+                    {item.number_of_ingredients}
                   </Text>
                 </View>
               </View>
@@ -169,7 +182,7 @@ const Category = () => {
           </Text>
         </View>
         <FlatList
-          data={data.recipe}
+          data={recipes.reverse()}
           className="mt-4 pb-5"
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -184,7 +197,7 @@ const Category = () => {
               <Image
                 onLoad={() => console.log(item.title)}
                 className="w-full h-full rounded-3xl"
-                source={item.source}
+                source={images[item.image]}
               />
               <LinearGradient
                 colors={["transparent", "rgba(0,0,0,0.6)"]}
@@ -225,7 +238,7 @@ const Category = () => {
                       source={images.clock}
                     />
                     <Text className="ml-2 text-md text-white font-Inter-Light">
-                      {item.time}
+                      {item.duration}
                     </Text>
                   </View>
                   <View className="flex-row items-center">
@@ -234,7 +247,7 @@ const Category = () => {
                       source={images.ingredients}
                     />
                     <Text className="ml-2 text-lg text-white font-Inter-Light">
-                      {item.ingredients}
+                      {item.number_of_ingredients}
                     </Text>
                   </View>
                 </View>

@@ -8,9 +8,8 @@ import {
   ScrollView,
   TextInput,
   FlatList,
-  Dimensions,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6, AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
@@ -18,10 +17,60 @@ import images from "@/constant/images";
 import ItemCate from "@/components/ItemCate";
 import data from "@/constant/data";
 import { LinearGradient } from "expo-linear-gradient";
-import { Redirect } from "expo-router";
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+import { Redirect, router } from "expo-router";
+
+import axios from "axios";
+import "react-native-get-random-values";
+import { Recipe } from "@/type";
+import { windowHeight, windowWidth } from "@/app-example/constants/constant";
+const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
+import * as Location from "expo-location";
+
 const Home = () => {
+  const handlePressRecipe = (recipe: Recipe) => {
+    router.push({
+      pathname: "/favorite/Details",
+      params: {
+        item: JSON.stringify(recipe),
+        isExpoRouter: 1,
+      },
+    });
+  };
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+  const [recipes, setRecipes] = useState<Array<Recipe>>([]);
+  const [address, setAddress] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  useEffect(() => {
+    axios
+      .get(`${hostId}:80/api/getRecipes`)
+      .then(function (response) {
+        setRecipes(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
+  useEffect(() => {
+    async function getCurrentLocation() {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      setAddress(address);
+      console.log(address);
+    }
+    getCurrentLocation();
+  }, []);
+  const handlePress = () => {};
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -46,7 +95,7 @@ const Home = () => {
                 name="location"
               />
               <Text className="font-Inter-Medium text-xl mx-1">
-                69 Nguyễn Đình Hiến
+                {address.name}
               </Text>
               <Feather
                 size={20}
@@ -64,6 +113,7 @@ const Home = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View className="px-4 h-[180px] mt-2 ">
             <Swiper
+              autoplay
               containerStyle={{
                 borderRadius: 24,
                 overflow: "hidden",
@@ -79,7 +129,14 @@ const Home = () => {
               <View className="flex-1 mx-2">
                 <Image
                   resizeMode="cover"
-                  source={images.thumbnail1}
+                  source={images.McDonaldThumbnail}
+                  className="w-full h-full rounded-3xl"
+                />
+              </View>
+              <View className="flex-1 mx-2">
+                <Image
+                  resizeMode="cover"
+                  source={images.kfcThumbnail}
                   className="w-full h-full rounded-3xl"
                 />
               </View>
@@ -87,7 +144,10 @@ const Home = () => {
           </View>
           <View className="px-7">
             <View className=" flex-row items-center justify-center mt-5 bg-[rgba(0,0,0,0.02)] rounded-full">
-              <TouchableOpacity className="p-4">
+              <TouchableOpacity
+                onPress={handlePress}
+                className="p-4"
+              >
                 <AntDesign
                   size={28}
                   name="search1"
@@ -140,13 +200,14 @@ const Home = () => {
             />
           </View>
           <FlatList
-            data={data.recipe}
+            data={recipes}
             className="mt-5 pb-5"
             contentContainerClassName="px-7"
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item, index }) => (
-              <View
+              <TouchableOpacity
+                onPress={() => handlePressRecipe(item)}
                 style={{
                   height: windowHeight / 2.5,
                   width: windowWidth / 1.7,
@@ -155,7 +216,7 @@ const Home = () => {
               >
                 <Image
                   className="w-full h-full rounded-3xl"
-                  source={item.source}
+                  source={images[item.image]}
                 />
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.5)"]}
@@ -190,18 +251,18 @@ const Home = () => {
                       source={images.clock}
                     />
                     <Text className="ml-2 text-sm text-white font-Inter-Light">
-                      {item.time}
+                      {item.duration}
                     </Text>
                     <Image
                       className="w-5 h-5 ml-4"
                       source={images.ingredients}
                     />
                     <Text className="ml-2 text-sm text-white font-Inter-Light">
-                      {item.ingredients} nguyên liệu
+                      {item.number_of_ingredients} nguyên liệu
                     </Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             )}
           />
         </ScrollView>
