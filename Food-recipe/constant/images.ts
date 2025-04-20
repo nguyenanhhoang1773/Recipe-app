@@ -23,6 +23,7 @@ import logoLogIn from "@/assets/images/logo.png";
 import github from "@/assets/images/github.png";
 import banhmi from "@/assets/images/banhmi.jpg";
 import chien from "@/assets/images/Chien.jpg";
+import chatbot from "@/assets/images/chatbot.jpg";
 
 export default {
   chien,
@@ -49,4 +50,5 @@ export default {
   rau,
   cachua,
   cheese,
+  chatbot
 };
