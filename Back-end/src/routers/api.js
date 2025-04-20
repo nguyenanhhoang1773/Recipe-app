@@ -11,8 +11,12 @@ const {
 } = require("../controllers/Feedback/Feedback.js");
 const { login } = require("../controllers/User/User.js");
 const searchItems = require("../controllers/Search/Search.js");
+const { addRecipe, getRecipes } = require("../controllers/Recipe/Recipe.js");
 //router User
 router.post("/login", login);
+//router Recipes
+router.post("/addRecipe", addRecipe);
+router.get("/getRecipes", getRecipes);
 
 // router liked
 router.get("/liked/:id_user", getLiked);
