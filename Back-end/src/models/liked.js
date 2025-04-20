@@ -8,6 +8,8 @@ const Liked = new Schema({
     name: { type: String },
     image: { type: String },
     description: { type: String },
+    ingredients: { type: String },
+    instructions: { type: String },
     createdAt: { type: Date, default: Date.now },
 
 });

@@ -1,11 +1,10 @@
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 import React from "react";
+import Index from "../explore/index"
 
 const Explore = () => {
   return (
-    <View>
-      <Text>Explore</Text>
-    </View>
+    <Index />  
   );
 };
 

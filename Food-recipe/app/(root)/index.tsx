@@ -8,6 +8,8 @@ import {
   ScrollView,
   TextInput,
   FlatList,
+  Dimensions,
+  StatusBar,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -76,6 +78,11 @@ const Home = () => {
       edges={["top", "left", "right"]}
       className="flex-1 bg-white"
     >
+      <StatusBar
+        backgroundColor="#0B9A61"
+        barStyle="light-content"
+      />
+
       <View className="flex-1">
         <View className="px-7 flex-row items-center justify-between pb-2">
           <TouchableOpacity className="rounded-full bg-[rgba(0,0,0,0.02)] p-3">

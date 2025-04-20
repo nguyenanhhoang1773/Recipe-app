@@ -2,7 +2,7 @@ const Liked = require('../../models/liked');
 
 const getLiked = async (req, res) => {
     try {
-        const id_user = req.params.id_user; 
+        const id_user = req.params.id_user;
         if (!id_user) {
             return res.status(400).json({ message: 'Thiếu id_user' });
         }
@@ -27,7 +27,7 @@ const addLiked = async (req, res) => {
             return res.json({ message: 'Công thức này trong danh sách món yêu thích', status: false });
         } else {
             const newLiked = new Liked(liked);
-            await newLiked.save(); 
+            await newLiked.save();
             res.status(200).json({ message: `Đã thích công thức món ăn ${liked.name}`, status: true });;
         }
 
@@ -37,6 +37,7 @@ const addLiked = async (req, res) => {
 }
 const unLiked = async (req, res) => {
     try {
+        console.log(req.body)
         const id_user = req.body.id_user;
         const id_recipe = req.body.id_recipe;
 
@@ -55,4 +56,4 @@ const unLiked = async (req, res) => {
         res.status(500).json({ message: 'Lỗi server', status: false });
     }
 };
-module.exports = { getLiked, addLiked,unLiked };
+module.exports = { getLiked, addLiked, unLiked };

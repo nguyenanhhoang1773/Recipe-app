@@ -42,7 +42,7 @@ const Category = () => {
         <View className="flex-row items-center">
           <View className="flex-1">
             <Text className="text-xl text-text-primary font-Inter-SemiBold">
-              Xin chào, Hoàng
+              Xin chào, {user?.fullName}
             </Text>
             <Text className="text-3xl font-Inter-Bold mt-2">
               Bạn muốn nấu món gì cho hôm nay?

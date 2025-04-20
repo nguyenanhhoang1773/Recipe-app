@@ -5,19 +5,19 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
-  Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import images from "@/constant/images";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
-import data from "@/constant/data";
-import React, { useLayoutEffect } from "react";
+import { Modal, TextInput } from "react-native";
+import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useUser, useClerk } from "@clerk/clerk-expo";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+import { router } from "expo-router";
+
 type TabParamList = {
   Profile: undefined;
   Favorite: undefined;
@@ -26,14 +26,253 @@ type TabParamList = {
 };
 
 const Profile = () => {
-  const insets = useSafeAreaInsets();
   const { user } = useUser();
   const { signOut } = useClerk();
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<TabParamList>>();
+  const [editingBio, setEditingBio] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(user?.imageUrl || null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
   useLayoutEffect(() => {
     navigation.setOptions({ animation: "slide_from_right" });
   }, [navigation]);
+
+  interface UserData {
+    bio?: string;
+    image_url?: string;
+  }
+
+  type Post = {
+    _id: string;
+    name: string;
+    image: string;
+    description: string;
+  };
+
+  const fakeLoadData = (message: string) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      fetchUserData();
+      fetchUserPost();
+      Alert.alert("Thông báo!", message, [{ text: "OK" }]);
+    }, 3000);
+  };
+  const fetchUserData = async () => {
+    if (!user?.id) {
+      console.log("Không có user.id");
+      return;
+    }
+    try {
+      const res = await axios.post<UserData>(`${hostId}:80/api/getUser`, {
+        id_user: user.id,
+      });
+      setBio(res.data.bio || "");
+      setAvatar(res.data.image_url || user.imageUrl);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ.");
+    }
+  };
+
+  const fetchUserPost = async () => {
+    try {
+      const res = await axios.post<Post[]>(`${hostId}:80/api/getPost`, {
+        id_user: user?.id,
+      });
+      console.log("Công thức nhận được:", res.data);
+      setPosts(res.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy công thức cá nhân:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+      fetchUserPost();
+    }
+  }, [user]);
+
+  const handleSettingsPress = () => {
+    Alert.alert(
+      "Cài đặt hồ sơ",
+      "Bạn muốn thực hiện thao tác gì?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+        {
+          text: "Thay đổi ảnh đại diện",
+          onPress: async () => {
+            Alert.alert("Chọn ảnh", "Bạn muốn thực hiện thao tác nào?", [
+              {
+                text: "Chụp ảnh",
+                onPress: handleTakePhoto,
+              },
+              {
+                text: "Chọn từ thư viện",
+                onPress: handleSelectPhoto,
+              },
+              {
+                text: "Hủy",
+                style: "cancel",
+              },
+            ]);
+          },
+        },
+        {
+          text: "Thêm giới thiệu hồ sơ",
+          onPress: handleAddBio,
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const uploadToCloudinary = async (imageUri: string) => {
+    const data = new FormData();
+
+    data.append("file", {
+      uri: imageUri,
+      type: "image/jpeg",
+      name: "upload.jpg",
+    } as any);
+
+    data.append("upload_preset", "mepeyyon");
+
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dnynvkw0b/image/upload",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+
+      const json = await res.json();
+      const secureUrl = json.secure_url;
+      console.log("Đã tải lên Cloudinary:", secureUrl);
+      return secureUrl;
+    } catch (error) {
+      console.error("Lỗi khi upload lên Cloudinary:", error);
+      throw error;
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "Quyền bị từ chối",
+        "Vui lòng cấp quyền truy cập camera trong cài đặt."
+      );
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      updateAvatar(uri);
+    } else {
+      console.log("Không có ảnh nào được chụp hoặc bị lỗi.");
+    }
+  };
+
+  const handleSelectPhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "Quyền bị từ chối",
+        "Vui lòng cấp quyền truy cập camera trong cài đặt."
+      );
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      updateAvatar(uri);
+    } else {
+      console.log("Không có ảnh nào được chọn hoặc bị lỗi.");
+    }
+  };
+
+  const updateAvatar = async (uri: string) => {
+    if (!user?.id) {
+      Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
+      return;
+    }
+    try {
+      const cloudUrl = await uploadToCloudinary(uri);
+      await axios.post(`${hostId}:80/api/updateUser`, {
+        id_user: user.id,
+        image_url: cloudUrl,
+      });
+      fakeLoadData("Ảnh đại diện đã được cập nhật!");
+      setAvatar(cloudUrl);
+      console.log("Ảnh mới:", cloudUrl);
+    } catch (err) {
+      Alert.alert("Lỗi", "Không thể tải ảnh lên Cloudinary");
+    }
+  };
+
+  const handleAddBio = () => {
+    setEditingBio(bio);
+    setModalVisible(true);
+  };
+
+  const handleBio = async () => {
+    if (!user?.id) {
+      Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
+      return;
+    }
+
+    const trimmedBio = editingBio.trim();
+
+    if (trimmedBio === "") {
+      Alert.alert("Lỗi", "Vui lòng nhập nội dung giới thiệu.");
+      return;
+    }
+
+    if (trimmedBio.length > 100) {
+      Alert.alert("Lỗi", "Giới thiệu không được vượt quá 100 ký tự.");
+      return;
+    }
+
+    try {
+      setModalVisible(false);
+      setBio(trimmedBio);
+
+      const res = await axios.post<{ user: UserData }>(
+        `${hostId}:80/api/updateUser`,
+        {
+          id_user: user.id,
+          bio: trimmedBio,
+        }
+      );
+
+      if (res.data?.user?.bio) {
+        setBio(res.data.user.bio);
+        fakeLoadData("Giới thiệu hồ sơ đã được cập nhật!");
+      }
+
+      console.log("Cập nhật thành công:", res.data);
+    } catch (error: any) {
+      console.error("Lỗi khi cập nhật:", error?.message || error);
+      Alert.alert("Lỗi", "Không thể cập nhật hồ sơ. Vui lòng thử lại.");
+    }
+  };
 
   const handleLogOut = () => {
     Alert.alert("Thông báo!", "Bạn có chắc chắn muốn đăng xuất không?", [
@@ -44,6 +283,23 @@ const Profile = () => {
 
   return (
     <View className="flex-1 bg-gray-100">
+      {isLoading && (
+        <Modal
+          visible={true}
+          transparent
+          animationType="none"
+        >
+          <View className="flex-1 justify-center items-center bg-black/60">
+            <View className="bg-green-500 px-6 py-4 rounded-xl items-center">
+              <ActivityIndicator
+                size="large"
+                color="#fff"
+              />
+              <Text className="text-white mt-2 text-base">Đang tải...</Text>
+            </View>
+          </View>
+        </Modal>
+      )}
       {/* Ảnh nền */}
       <View className={`relative h-52`}>
         <Image
@@ -51,17 +307,12 @@ const Profile = () => {
           className="w-full h-full"
           resizeMode="cover"
         />
-        <View
-          className="absolute bottom-0 w-full h-5 bg-gray-100"
-          style={{ borderTopLeftRadius: 32, borderTopRightRadius: 32 }}
-        />
+        <View className="absolute bottom-0 w-full h-5 bg-gray-100 rounded-t-[32px]" />
         <View className="absolute w-full px-2">
-          <View
-            style={{ paddingTop: insets.top }}
-            className="flex-row justify-between items-center px-6 pt-6 "
-          >
-            <Text className="text-2xl font-semibold">My profile</Text>
+          <View className="flex-row justify-between items-center px-6 pt-6">
+            <Text className="text-2xl font-semibold">Thông tin cá nhân</Text>
             <MaterialIcons
+              onPress={handleSettingsPress}
               name="settings"
               size={24}
               color="black"
@@ -71,31 +322,27 @@ const Profile = () => {
       </View>
 
       {/* Avatar */}
-      <View
-        className="absolute w-full items-center"
-        style={{ top: 100 }}
-      >
+      <View className="absolute w-full items-center top-[100px]">
         <Image
-          source={{ uri: user?.imageUrl }}
+          source={{ uri: avatar || user?.imageUrl }}
           className="w-48 h-48 rounded-full border-4 border-white"
         />
       </View>
 
       {/* Thông tin người dùng */}
-      <View className="items-center mt-24">
-        <Text className="text-3xl font-bold">{user?.fullName}</Text>
-        <Text className="text-gray-500 text-lg">Nấu ăn từ 10/2024</Text>
-      </View>
-
-      {/* Badge */}
-      <View className="flex-row justify-center mt-3 space-x-3">
-        <View className="items-center min-w-[150px]">
-          <Text className="text-xl font-semibold">45</Text>
-          <Text className="text-gray-500 text-lg text-center">Đã follow</Text>
-        </View>
-        <View className="items-center min-w-[150px]">
-          <Text className="text-xl font-semibold">1.32k</Text>
-          <Text className="text-gray-500 text-lg text-center">Followers</Text>
+      <View className="items-center mt-28">
+        <Text className="text-2xl font-bold">{user?.fullName}</Text>
+        <View className="flex-row items-center">
+          <Text className="text-gray-500 text-lg">
+            {bio || "Chưa có giới thiệu..."}
+          </Text>
+          <TouchableOpacity onPress={handleAddBio}>
+            <Ionicons
+              name="pencil"
+              size={20}
+              color="gray"
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -115,23 +362,31 @@ const Profile = () => {
             />
           </TouchableOpacity>
         </View>
-
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={data.recipe.slice(0, 3)}
-          renderItem={({ item }) => (
-            <TouchableOpacity className="mr-4 mt-3">
-              <Image
-                className="w-64 h-40 rounded-lg"
-                source={item.source}
-              />
-              <Text className="text-xl font-medium mt-2 mb-3">
-                {item.title}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
+        {posts.length === 0 ? (
+          <Text className="mt-3 text-gray-500">Bạn chưa có bài viết nào.</Text>
+        ) : (
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={posts.slice(0, 3)}
+            renderItem={({ item }) => (
+              <TouchableOpacity className="mr-4 mt-3">
+                <Image
+                  className="w-64 h-40 rounded-lg"
+                  source={{ uri: item.image }}
+                />
+                <Text className="text-xl font-medium mt-2">{item.name}</Text>
+                <Text
+                  className="text-l mb-3 w-[230px]"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {item.description}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </View>
 
       {/* Các chức năng */}
@@ -139,7 +394,8 @@ const Profile = () => {
         <TouchableOpacity
           activeOpacity={0.7}
           className="flex-row items-center py-4 border-b border-gray-200"
-          onPress={() => navigation.navigate("Favorite")}
+          // onPress={() => navigation.navigate("Favorite")}
+          onPress={() => router.push("../Favorite")}
         >
           <Ionicons
             name="heart-outline"
@@ -171,6 +427,50 @@ const Profile = () => {
           />
         </TouchableOpacity>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          className="flex-1 justify-center items-center bg-black/30 px-4"
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            className="bg-white w-full rounded-xl p-6 space-y-4"
+          >
+            <Text className="text-xl font-semibold  mb-2">
+              Giới thiệu hồ sơ
+            </Text>
+            <TextInput
+              maxLength={100}
+              placeholder="Nhập nội dung giới thiệu..."
+              className="border border-gray-300 rounded-lg p-3 text-base"
+              value={editingBio}
+              onChangeText={setEditingBio}
+              multiline
+            />
+            <View className="flex-row justify-end mt-4">
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text className="text-gray-500 text-base">Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="ml-6"
+                onPress={() => {
+                  handleBio();
+                }}
+              >
+                <Text className="text-green-600 font-semibold text-base">
+                  Lưu
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };

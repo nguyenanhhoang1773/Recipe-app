@@ -23,10 +23,12 @@ import github from "@/assets/images/github.png";
 import banhmi from "@/assets/images/banhmi.jpg";
 import kfcThumbnail from "@/assets/images/kfcThumbnail.jpg";
 import McDonaldThumbnail from "@/assets/images/McDonaldThumbnail.png";
+import chien from "@/assets/images/Chien.jpg";
 
 const images: Record<string, any> = {
   kfcThumbnail,
   McDonaldThumbnail,
+  chien,
   banhmi,
   github,
   logoLogIn,
