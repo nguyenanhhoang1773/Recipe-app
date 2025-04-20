@@ -94,7 +94,6 @@ const Profile = () => {
     if (user) {
       fetchUserData();
       fetchUserPost();
-
     }
   }, [user]);
 
@@ -130,7 +129,6 @@ const Profile = () => {
           text: "Thêm giới thiệu hồ sơ",
           onPress: handleAddBio,
         },
-
       ],
       { cancelable: true }
     );
@@ -148,10 +146,13 @@ const Profile = () => {
     data.append("upload_preset", "mepeyyon");
 
     try {
-      const res = await fetch("https://api.cloudinary.com/v1_1/dnynvkw0b/image/upload", {
-        method: "POST",
-        body: data,
-      });
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dnynvkw0b/image/upload",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
 
       const json = await res.json();
       const secureUrl = json.secure_url;
@@ -166,7 +167,10 @@ const Profile = () => {
   const handleTakePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Quyền bị từ chối", "Vui lòng cấp quyền truy cập camera trong cài đặt.");
+      Alert.alert(
+        "Quyền bị từ chối",
+        "Vui lòng cấp quyền truy cập camera trong cài đặt."
+      );
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -185,7 +189,10 @@ const Profile = () => {
   const handleSelectPhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Quyền bị từ chối", "Vui lòng cấp quyền truy cập camera trong cài đặt.");
+      Alert.alert(
+        "Quyền bị từ chối",
+        "Vui lòng cấp quyền truy cập camera trong cài đặt."
+      );
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -220,11 +227,9 @@ const Profile = () => {
     }
   };
 
-
   const handleAddBio = () => {
     setEditingBio(bio);
     setModalVisible(true);
-
   };
 
   const handleBio = async () => {
@@ -249,10 +254,13 @@ const Profile = () => {
       setModalVisible(false);
       setBio(trimmedBio);
 
-      const res = await axios.post<{ user: UserData }>(`${hostId}:80/api/updateUser`, {
-        id_user: user.id,
-        bio: trimmedBio,
-      });
+      const res = await axios.post<{ user: UserData }>(
+        `${hostId}:80/api/updateUser`,
+        {
+          id_user: user.id,
+          bio: trimmedBio,
+        }
+      );
 
       if (res.data?.user?.bio) {
         setBio(res.data.user.bio);
@@ -266,7 +274,6 @@ const Profile = () => {
     }
   };
 
-
   const handleLogOut = () => {
     Alert.alert("Thông báo!", "Bạn có chắc chắn muốn đăng xuất không?", [
       { text: "Hủy", style: "cancel" },
@@ -274,29 +281,33 @@ const Profile = () => {
     ]);
   };
 
-  return(
+  return (
     <View className="flex-1 bg-gray-100">
-      {
-        isLoading &&
-        <Modal visible={true} transparent animationType="none">
+      {isLoading && (
+        <Modal
+          visible={true}
+          transparent
+          animationType="none"
+        >
           <View className="flex-1 justify-center items-center bg-black/60">
             <View className="bg-green-500 px-6 py-4 rounded-xl items-center">
-              <ActivityIndicator size="large" color="#fff" />
+              <ActivityIndicator
+                size="large"
+                color="#fff"
+              />
               <Text className="text-white mt-2 text-base">Đang tải...</Text>
             </View>
           </View>
         </Modal>
-      }
+      )}
       {/* Ảnh nền */}
-      <View className="relative h-52">
+      <View className={`relative h-52`}>
         <Image
           source={images.thumbnail}
           className="w-full h-full"
           resizeMode="cover"
         />
-        <View
-          className="absolute bottom-0 w-full h-5 bg-gray-100 rounded-t-[32px]"
-        />
+        <View className="absolute bottom-0 w-full h-5 bg-gray-100 rounded-t-[32px]" />
         <View className="absolute w-full px-2">
           <View className="flex-row justify-between items-center px-6 pt-6">
             <Text className="text-2xl font-semibold">Thông tin cá nhân</Text>
@@ -311,9 +322,7 @@ const Profile = () => {
       </View>
 
       {/* Avatar */}
-      <View
-        className="absolute w-full items-center top-[100px]"
-      >
+      <View className="absolute w-full items-center top-[100px]">
         <Image
           source={{ uri: avatar || user?.imageUrl }}
           className="w-48 h-48 rounded-full border-4 border-white"
@@ -324,9 +333,15 @@ const Profile = () => {
       <View className="items-center mt-28">
         <Text className="text-2xl font-bold">{user?.fullName}</Text>
         <View className="flex-row items-center">
-          <Text className="text-gray-500 text-lg">{bio || "Chưa có giới thiệu..."}</Text>
+          <Text className="text-gray-500 text-lg">
+            {bio || "Chưa có giới thiệu..."}
+          </Text>
           <TouchableOpacity onPress={handleAddBio}>
-            <Ionicons name="pencil" size={20} color="gray" />
+            <Ionicons
+              name="pencil"
+              size={20}
+              color="gray"
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -360,12 +375,12 @@ const Profile = () => {
                   className="w-64 h-40 rounded-lg"
                   source={{ uri: item.image }}
                 />
-                <Text className="text-xl font-medium mt-2">
-                  {item.name}
-                </Text>
-                <Text className="text-l mb-3 w-[230px]"
+                <Text className="text-xl font-medium mt-2">{item.name}</Text>
+                <Text
+                  className="text-l mb-3 w-[230px]"
                   numberOfLines={1}
-                  ellipsizeMode="tail">
+                  ellipsizeMode="tail"
+                >
                   {item.description}
                 </Text>
               </TouchableOpacity>
@@ -423,8 +438,13 @@ const Profile = () => {
           activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
-          <TouchableOpacity activeOpacity={1} className="bg-white w-full rounded-xl p-6 space-y-4">
-            <Text className="text-xl font-semibold  mb-2">Giới thiệu hồ sơ</Text>
+          <TouchableOpacity
+            activeOpacity={1}
+            className="bg-white w-full rounded-xl p-6 space-y-4"
+          >
+            <Text className="text-xl font-semibold  mb-2">
+              Giới thiệu hồ sơ
+            </Text>
             <TextInput
               maxLength={100}
               placeholder="Nhập nội dung giới thiệu..."
@@ -440,10 +460,12 @@ const Profile = () => {
               <TouchableOpacity
                 className="ml-6"
                 onPress={() => {
-                  handleBio()
+                  handleBio();
                 }}
               >
-                <Text className="text-green-600 font-semibold text-base">Lưu</Text>
+                <Text className="text-green-600 font-semibold text-base">
+                  Lưu
+                </Text>
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -453,4 +475,4 @@ const Profile = () => {
   );
 };
 
-export default Profile
+export default Profile;

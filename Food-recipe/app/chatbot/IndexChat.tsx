@@ -1,4 +1,4 @@
-import { View, Text, Image, ScrollView, TextInput, Alert } from 'react-native'
+import { View, Text, Image, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native'
 import React, { useState, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -18,6 +18,7 @@ const IndexChat = () => {
             text: `Xin chào ${user?.fullName} !! Tôi có thể giúp gì cho bạn`,
         },
     ]);
+    const [isTyping, setIsTyping] = useState(false);
 
     const handleChat = async () => {
         if (!text.trim()) return;
@@ -26,12 +27,25 @@ const IndexChat = () => {
         setMessages(prev => [...prev, userMessage]);
         setText("");
 
+        setIsTyping(true);
+        const thinkingMessage = { type: 'bot', text: '🤖 Đang suy nghĩ...' };
+        setMessages(prev => [...prev, thinkingMessage]);
+
         try {
             const response = await axios.post('https://n8n.laptrinhmang3.xyz/webhook/recipe', { request: text });
-            const botMessage = { type: 'bot', text: response.data.responed };
-            setMessages(prev => [...prev, botMessage]);
+
+            setMessages(prev => [
+                ...prev.filter(msg => msg.text !== '🤖 Đang suy nghĩ...'),
+                { type: 'bot', text: response.data.responed }
+            ]);
         } catch (error) {
             console.log("Có lỗi xảy ra:", error);
+            setMessages(prev => [
+                ...prev.filter(msg => msg.text !== '🤖 Đang suy nghĩ...'),
+                { type: 'bot', text: '❌ Có lỗi xảy ra. Vui lòng thử lại!' }
+            ]);
+        } finally {
+            setIsTyping(false);
         }
     };
 
@@ -97,6 +111,13 @@ const IndexChat = () => {
                         )}
                     </View>
                 ))}
+                {isTyping && (
+                    <View className="flex-row items-center gap-2 mt-2 my-4">
+                        <ActivityIndicator size="small" color="#0B9A61" />
+                        <Text className="text-sm text-gray-500">Bot đang trả lời...</Text>
+                    </View>
+                )}
+
             </ScrollView>
 
             {/* Ô nhập */}
