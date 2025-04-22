@@ -105,7 +105,7 @@ const Feedback: React.FC<FeedbackProps> = ({ id_recipe }) => {
                 </Modal>
             }
 
-            <View className='p-2 my-1  rounded-lg ' style={{ backgroundColor: 'rgba(0, 188, 0, 0.1)' }}>
+            <View className="p-2 my-1 rounded-lg bg-[rgba(0,188,0,0.1)]">
                 {/* <Spinner visible={isLoading} textContent="Loading..." textStyle={{ color: '#FFF' }} /> */}
 
                 <Text className='font-bold text-[20px]'>

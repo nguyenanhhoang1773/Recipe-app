@@ -298,13 +298,13 @@ const Profile = () => {
           className="absolute bottom-0 w-full h-5 bg-gray-100 rounded-t-[32px]"
         />
         <View className="absolute w-full px-2">
-          <View className="flex-row justify-between items-center px-6 pt-6">
-            <Text className="text-2xl font-semibold">Thông tin cá nhân</Text>
+          <View className="flex-row justify-between items-center p-3">
+            <Text className="text-2xl font-semibold " >Thông tin cá nhân</Text>
             <MaterialIcons
               onPress={handleSettingsPress}
               name="settings"
               size={24}
-              color="black"
+              color="#0B9A61"
             />
           </View>
         </View>
@@ -326,7 +326,7 @@ const Profile = () => {
         <View className="flex-row items-center">
           <Text className="text-gray-500 text-lg">{bio || "Chưa có giới thiệu..."}</Text>
           <TouchableOpacity onPress={handleAddBio}>
-            <Ionicons name="pencil" size={20} color="gray" />
+            <Ionicons name="pencil" size={20} color="#0B9A61" />
           </TouchableOpacity>
         </View>
       </View>
@@ -337,13 +337,13 @@ const Profile = () => {
           <Text className="text-xl font-semibold">Công thức cá nhân</Text>
           <TouchableOpacity
             className="flex-row"
-            onPress={() => navigation.navigate("Explore")}
+            onPress={() => router.push("../Explore")}
           >
             <Text className="text-green-500">Tất cả</Text>
             <Feather
               name="chevron-right"
               size={20}
-              color="gray"
+              color="#0B9A61"
             />
           </TouchableOpacity>
         </View>
@@ -385,13 +385,13 @@ const Profile = () => {
           <Ionicons
             name="heart-outline"
             size={24}
-            color="#6c63ff"
+            color="#0B9A61"
           />
-          <Text className="flex-1 text-lg text-gray-800 ml-4">Yêu thích</Text>
+          <Text className="flex-1 text-lg text-800 ml-4">Yêu thích</Text>
           <Ionicons
             name="chevron-forward-outline"
             size={20}
-            color="#bbb"
+            color="#0B9A61"
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -402,13 +402,13 @@ const Profile = () => {
           <Ionicons
             name="log-out-outline"
             size={24}
-            color="#6c63ff"
+            color="#0B9A61"
           />
-          <Text className="flex-1 text-lg text-gray-800 ml-4">Đăng xuất</Text>
+          <Text className="flex-1 text-lg text-800 ml-4">Đăng xuất</Text>
           <Ionicons
             name="chevron-forward-outline"
             size={20}
-            color="#bbb"
+            color="#0B9A61"
           />
         </TouchableOpacity>
       </View>

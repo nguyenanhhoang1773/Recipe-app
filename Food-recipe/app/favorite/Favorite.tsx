@@ -123,7 +123,7 @@ function Favorite() {
   };
   return (
     <View className="bg-white h-full">
-      <View className="p-3" style={{ backgroundColor: "#0B9A61" }}>
+      <View className="p-3 bg-[#0B9A61]">
         <Text className="text-2xl font-bold text-white" >Món Ăn Yêu Thích</Text>
       </View>
       <ScrollView className=" bg-white">

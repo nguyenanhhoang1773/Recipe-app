@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   Image,
   TextInput,
   TouchableOpacity,
@@ -11,6 +10,7 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Feather } from "@expo/vector-icons";
@@ -19,6 +19,10 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { useUser } from "@clerk/clerk-expo";
 import axios from "axios";
 
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 type PostType = {
   _id: string;
   name: string;
@@ -26,19 +30,12 @@ type PostType = {
   ingredients: string;
   instructions: string;
   list_images: string[];
-  id_category: {
-    _id: string;
-    type: string;
-  };
+  type: string;
 };
 
 type RootStackParamList = {
   POST: { post?: PostType };
 };
-
-if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const POST = () => {
   const { user } = useUser();
@@ -57,7 +54,7 @@ const POST = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const displayName =
     user?.fullName ||
     user?.username ||
@@ -81,7 +78,7 @@ const POST = () => {
       setDescription(postToEdit.description);
       setIngredients(postToEdit.ingredients);
       setInstructions(postToEdit.instructions);
-      setSelectedCategory(postToEdit.id_category?._id || "");
+      setSelectedCategory(postToEdit.type);
       setSelectedImages(postToEdit.list_images || []);
     }
   }, [postToEdit]);
@@ -141,107 +138,107 @@ const POST = () => {
       ingredients,
       instructions,
       list_images,
-      id_category: selectedCategory,
+      type: selectedCategory,
     };
 
-    try {
-      if (postToEdit) {
-        const response = await fetch(`${hostId}:80/api/updatePost`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...postData, id: postToEdit._id }),
-        });
-        const data = await response.json();
-        if (data.post) Alert.alert("Cập nhật thành công", "Bài viết đã được cập nhật!");
-      } else {
-        const response = await fetch(`${hostId}:80/api/addPost`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(postData),
-        });
-        const data = await response.json();
-        if (data.status || data.success) Alert.alert("Thành công", "Bài viết đã được đăng!");
-      }
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
-      setTitle("");
-      setDescription("");
-      setIngredients("");
-      setInstructions("");
-      setSelectedCategory("");
-      setSelectedImages([]);
-      navigation.goBack();
+    try {
+      const url = postToEdit ? `${hostId}:80/api/updatePost` : `${hostId}:80/api/addPost`;
+      const method = postToEdit ? "PUT" : "POST";
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(postToEdit ? { ...postData, id: postToEdit._id } : postData),
+      });
+      const data = await response.json();
+      if (data.status || data.success || data.post) {
+        Alert.alert("Thành công", postToEdit ? "Bài viết đã được cập nhật!" : "Bài viết đã được đăng!");
+        setTitle("");
+        setDescription("");
+        setIngredients("");
+        setInstructions("");
+        setSelectedCategory("");
+        setSelectedImages([]);
+        navigation.goBack();
+      }
     } catch (err) {
       Alert.alert("Lỗi", "Đã xảy ra lỗi khi gửi dữ liệu.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.headerBar}>
+    <ScrollView className="flex-1 p-4 bg-white">
+      <View className="flex-row items-center justify-between mb-5">
         <Ionicons name="arrow-back" size={24} color="black" onPress={() => navigation.goBack()} />
-        <Text style={styles.headerText}>{postToEdit ? "Chỉnh sửa bài viết" : "Thêm bài viết"}</Text>
-        <View style={{ width: 24 }} />
+        <Text className="text-xl font-bold text-gray-800">{postToEdit ? "Chỉnh sửa bài viết" : "Thêm bài viết"}</Text>
+        <View className="w-6" />
       </View>
 
-      <View style={styles.userInfoWrapper}>
-        <Image source={{ uri: avatarUri }} style={styles.avatar} />
-        <View style={{ marginLeft: 10 }}>
-          <Text style={styles.name}>{displayName}</Text>
-          <Text style={styles.date}>{today}</Text>
+      <View className="flex-row items-center mb-5">
+        <Image source={{ uri: avatarUri }} className="w-12 h-12 rounded-full" />
+        <View className="ml-3">
+          <Text className="text-base font-semibold">{displayName}</Text>
+          <Text className="text-xs text-gray-500">{today}</Text>
         </View>
       </View>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>Danh mục</Text>
+      <View className="mb-3">
+        <Text className="font-semibold mb-1 text-base text-gray-700">Phương pháp chế biến</Text>
         <TouchableOpacity
-          style={styles.dropdown}
+          className="flex-row justify-between items-center bg-white p-3 rounded-xl mb-2 shadow"
           onPress={() => {
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
             setShowCategoryDropdown(!showCategoryDropdown);
           }}
         >
-          <Text style={styles.dropdownText}>
-            {categories.find((c) => c._id === selectedCategory)?.type || "Chọn danh mục"}
+          <Text className="text-base text-gray-700">
+            {selectedCategory || "Chọn phương pháp chế biến"}
           </Text>
           <Ionicons name={showCategoryDropdown ? "chevron-up" : "chevron-down"} size={20} color="#666" />
         </TouchableOpacity>
 
         {showCategoryDropdown && (
-          <View style={styles.dropdownList}>
-            {categories.map((item) => (
-              <TouchableOpacity
-                key={item._id}
-                onPress={() => {
-                  setSelectedCategory(item._id);
-                  setShowCategoryDropdown(false);
-                }}
-                style={styles.dropdownItem}
-              >
-                <Text style={styles.dropdownText}>{item.type}</Text>
-              </TouchableOpacity>
-            ))}
+          <View className="bg-white rounded-lg py-2 mb-3 shadow max-h-52">
+            <ScrollView nestedScrollEnabled={true} className="max-h-52">
+              {categories.map((item) => (
+                <TouchableOpacity
+                  key={item._id}
+                  onPress={() => {
+                    setSelectedCategory(item.type);
+                    setShowCategoryDropdown(false);
+                  }}
+                  className="py-2 px-4 border-b border-gray-100"
+                >
+                  <Text className="text-base text-gray-800">{item.type}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )}
 
-        <Text style={styles.label}>Tiêu đề</Text>
-        <TextInput placeholder="Tên món ăn" value={title} onChangeText={setTitle} style={styles.input} />
+        <Text className="font-semibold mb-1 text-base text-gray-700">Tiêu đề</Text>
+        <TextInput placeholder="Tên món ăn" value={title} onChangeText={setTitle} className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow" />
 
-        <Text style={styles.label}>Mô tả</Text>
-        <TextInput placeholder="Giới thiệu ngắn về món ăn" value={description} onChangeText={setDescription} multiline style={[styles.input, { height: 60 }]} />
+        <Text className="font-semibold mb-1 text-base text-gray-700">Mô tả</Text>
+        <TextInput placeholder="Giới thiệu ngắn về món ăn" value={description} onChangeText={setDescription} multiline className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-16" />
 
-        <Text style={styles.label}>Nguyên liệu</Text>
-        <TextInput placeholder="Liệt kê nguyên liệu" value={ingredients} onChangeText={setIngredients} multiline style={[styles.input, { height: 80 }]} />
+        <Text className="font-semibold mb-1 text-base text-gray-700">Nguyên liệu</Text>
+        <TextInput placeholder="Liệt kê nguyên liệu" value={ingredients} onChangeText={setIngredients} multiline className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-20" />
 
-        <Text style={styles.label}>Công thức chi tiết</Text>
-        <TextInput placeholder="Các bước chế biến" value={instructions} onChangeText={setInstructions} multiline style={[styles.input, { height: 120 }]} />
+        <Text className="font-semibold mb-1 text-base text-gray-700">Công thức chi tiết</Text>
+        <TextInput placeholder="Các bước chế biến" value={instructions} onChangeText={setInstructions} multiline className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-32" />
       </View>
 
-      <View style={styles.imageContainer}>
+      <View className="flex-col gap-2 mb-3">
         {selectedImages.map((img, idx) => (
-          <View key={idx} style={styles.imageWrapper}>
-            <Image source={{ uri: img }} style={styles.preview} />
+          <View key={idx} className="relative w-full h-44">
+            <Image source={{ uri: img }} className="w-full h-full rounded-xl" />
             <TouchableOpacity
-              style={styles.removeIcon}
+              className="absolute top-2 right-2 bg-white/80 rounded-full"
               onPress={() => {
                 const updated = [...selectedImages];
                 updated.splice(idx, 1);
@@ -254,128 +251,24 @@ const POST = () => {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.imagePicker} onPress={pickImages}>
-        <Feather name="image" size={20} color="#007bff" />
-        <Text style={styles.imagePickerText}> Chọn nhiều hình ảnh</Text>
+      <TouchableOpacity className="flex-row items-center mb-6 px-3" onPress={pickImages}>
+        <Feather name="image" size={20} color="#0B9A61" />
+        <Text className="text-500 text-base ml-2 font-medium text-[#0B9A61]">Chọn một hoặc nhiều ảnh</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={handlePost}>
-        <Text style={styles.buttonText}>{postToEdit ? "Cập nhật bài viết" : "Đăng bài"}</Text>
+      <TouchableOpacity
+        className={`bg-500 py-4 rounded-xl items-center shadow-md 
+                    ${isSubmitting ? "opacity-50" : "bg-[#0B9A61]"}`}
+        onPress={handlePost}>
+        {isSubmitting ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text className="text-white text-base font-bold tracking-wide">
+            {postToEdit ? "Cập nhật bài viết" : "Đăng bài"}
+          </Text>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
 };
 
 export default POST;
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fdfdfd" },
-  headerBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  headerText: { fontSize: 22, fontWeight: "bold", color: "#222" },
-  userInfoWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  avatar: { width: 50, height: 50, borderRadius: 25 },
-  name: { fontSize: 17, fontWeight: "600" },
-  date: { fontSize: 12, color: "gray" },
-  form: { marginBottom: 12 },
-  label: { fontWeight: "600", marginBottom: 4, fontSize: 15, color: "#444" },
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 10,
-    fontSize: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  dropdown: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 10,
-    elevation: 2,
-  },
-  dropdownList: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    paddingVertical: 4,
-    marginBottom: 12,
-    elevation: 3,
-  },
-  dropdownItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderBottomWidth: 0.5,
-    borderColor: "#eee",
-  },
-  dropdownText: {
-    fontSize: 15,
-    color: "#333",
-  },
-  imageContainer: {
-    flexDirection: "column",
-    gap: 10,
-    marginBottom: 12,
-  },
-  imageWrapper: {
-    position: "relative",
-    width: "100%",
-    height: 180,
-  },
-  preview: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 14,
-  },
-  removeIcon: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "fff",
-    borderRadius: 20,
-  },
-  imagePicker: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-    paddingHorizontal: 10,
-  },
-  imagePickerText: {
-    color: "#007bff",
-    fontSize: 15,
-    marginLeft: 8,
-    fontWeight: "500",
-  },
-  button: {
-    backgroundColor: "#007bff",
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    letterSpacing: 0.5,
-  },
-});
