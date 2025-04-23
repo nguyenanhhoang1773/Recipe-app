@@ -1,26 +1,22 @@
-import React from 'react';
-import { View, Text, Image, ScrollView } from 'react-native';
+import React from "react";
+import { View, Text, Image, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from "expo-router";
 import Feedback from "../app/feedback/feedback";
+import images from "@/constant/images";
+import { windowHeight } from "@/constant/constant";
 
 export default function ItemDetail() {
   const router = useRouter();
 
   // Nhận params từ URL
-  const {
-    id_recipe,
-    name,
-    image,
-    description,
-    ingredients,
-    instructions
-  } = useLocalSearchParams();
+  const { id_recipe, name, image, description, ingredients, instructions } =
+    useLocalSearchParams();
 
   return (
-    <View className="p-1 h-full bg-white">
+    <View className="h-full bg-white">
       <Ionicons
-        className="absolute left-2 top-2 z-10"
+        className="absolute left-2 top-10 z-10"
         name="arrow-back-circle-outline"
         color="#0B9A61"
         size={35}
@@ -29,11 +25,12 @@ export default function ItemDetail() {
 
       <ScrollView>
         <Image
-          source={{ uri: image as string }}
-          className="w-full h-[180px] rounded-md mb-2"
+          style={{ height: (windowHeight * 1) / 3 }}
+          source={images[image as string]}
+          className="w-full  rounded-md mb-2"
         />
 
-        <View className='p-2'>
+        <View className="p-2">
           <Text className="font-bold text-[20px]">{name}</Text>
           <Text className="text-[14px] font-medium ml-2">{description}</Text>
 
