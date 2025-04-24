@@ -16,7 +16,7 @@ export default function ItemDetail() {
   return (
     <View className="h-full bg-white">
       <Ionicons
-        className="absolute left-2 top-10 z-10"
+        className="absolute left-2 top-5 z-10"
         name="arrow-back-circle-outline"
         color="#0B9A61"
         size={35}
@@ -26,7 +26,8 @@ export default function ItemDetail() {
       <ScrollView>
         <Image
           style={{ height: (windowHeight * 1) / 3 }}
-          source={images[image as string]}
+          // source={images[image as string]}
+          source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSA7CyXemdfR_qLEor7Y61GmJ6cMRJfNDnrdQ&s" }}
           className="w-full  rounded-md mb-2"
         />
 
