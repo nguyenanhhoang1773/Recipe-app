@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  StyleSheet,
   Alert,
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
@@ -28,10 +27,7 @@ type Post = {
   description: string;
   instructions: string;
   list_images: string[];
-  id_category?: {
-    _id?: string;
-    type?: string;
-  };
+  type: string;
   createdAt: string;
 };
 
@@ -101,74 +97,50 @@ const Explore = () => {
       description={item.description}
       instructions={item.instructions}
       list_images={item.list_images}
-      id_category={item.id_category}
+      type={item.type}
       createdAt={item.createdAt}
       onDelete={() => handleDeletePost(item._id)}
       onEdit={() =>
         navigation.navigate("POST", {
-          post: item, // truyền dữ liệu để chỉnh sửa
-          onPostSuccess: fetchPosts, // reload lại danh sách sau khi update
+          post: item,
+          onPostSuccess: fetchPosts,
         })
       }
     />
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Công thức của tôi</Text>
+    <View className="flex-1 bg-gray-100">
+      <View className="p-3 flex-row justify-between items-center bg-[#0B9A61]">
+        <Text className="text-white text-2xl font-bold">Công thức của tôi</Text>
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("POST", {
               onPostSuccess: fetchPosts,
             })
           }
+          className="ml-4"
         >
-          <Ionicons name="add-circle-outline" size={28} color="black" />
+          <Ionicons name="add" size={28} color="white" />
         </TouchableOpacity>
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" style={styles.loading} />
-      ) : posts.length === 0 ? (
-        <Text style={styles.noPostText}>Bạn chưa có bài viết nào.</Text>
-      ) : (
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item._id}
-          renderItem={renderPostItem}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+      <View className="px-4 mt-4">
+        {loading ? (
+          <ActivityIndicator size="large" className="mt-8" />
+        ) : posts.length === 0 ? (
+          <Text className="text-center mt-10 text-base text-gray-500">Bạn chưa có bài viết nào.</Text>
+        ) : (
+          <FlatList
+            data={posts}
+            keyExtractor={(item) => item._id}
+            renderItem={renderPostItem}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </View>
   );
 };
 
 export default Explore;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#f2f2f2",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  loading: {
-    marginTop: 30,
-  },
-  noPostText: {
-    textAlign: "center",
-    marginTop: 40,
-    fontSize: 16,
-    color: "#666",
-  },
-});

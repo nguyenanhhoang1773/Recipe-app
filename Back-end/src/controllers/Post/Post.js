@@ -8,7 +8,6 @@ const getPost = async (req, res) => {
     }
 
     const posts = await Post.find({ id_user })
-      .populate('id_category', 'type') 
       .sort({ createdAt: -1 });
 
     return res.status(200).json(posts);
@@ -33,10 +32,10 @@ const addPost = async (req, res) => {
       ingredients,
       instructions,
       list_images,
-      id_category,
+      type,
     } = req.body;
 
-    if (!id_user || !name || !description || !ingredients || !instructions || !id_category) {
+    if (!id_user || !name || !description || !ingredients || !instructions || !type) {
       return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
     }
 
@@ -49,7 +48,7 @@ const addPost = async (req, res) => {
       ingredients,
       instructions,
       list_images: list_images || [],
-      id_category,
+      type,
     });
 
     await newPost.save();
