@@ -31,6 +31,7 @@ type PostType = {
   formula: string;
   image: string;
   type: string;
+  duration: string; 
 };
 
 type RootStackParamList = {
@@ -49,6 +50,7 @@ const POST = () => {
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [duration, setDuration] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
@@ -64,7 +66,7 @@ const POST = () => {
 
   const today = new Date().toLocaleDateString("vi-VN");
   const avatarUri =
-    userData?.avatar || user?.imageUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+    userData?.image_url || user?.imageUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
   useEffect(() => {
     if (!user?.id) return;
@@ -80,6 +82,7 @@ const POST = () => {
       setInstructions(postToEdit.formula);
       setSelectedCategory(postToEdit.type);
       setSelectedImages([postToEdit.image]);
+      setDuration(postToEdit.duration);
     }
   }, [postToEdit]);
 
@@ -118,7 +121,7 @@ const POST = () => {
   };
 
   const handlePost = async () => {
-    if (!title || !description || !ingredients || !instructions || !selectedCategory)
+    if (!title || !description || !ingredients || !instructions || !selectedCategory || !duration)
       return Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường bắt buộc.");
     if (!user?.id) return Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
 
@@ -135,8 +138,9 @@ const POST = () => {
       title,
       image: list_images[0] || "",
       type: selectedCategory,
-      duration: "30 phút",
+      duration,
       author: displayName,
+      userAvatar: userData?.image_url || "",
       number_or_ingredients: ingredients.split(",").length,
       ingredients,
       formula: instructions,
@@ -161,6 +165,7 @@ const POST = () => {
         setDescription("");
         setIngredients("");
         setInstructions("");
+        setDuration("");
         setSelectedCategory("");
         setSelectedImages([]);
         navigation.goBack();
@@ -171,6 +176,7 @@ const POST = () => {
       setIsSubmitting(false);
     }
   };
+
   return (
     <ScrollView className="flex-1 p-4 bg-white" contentContainerStyle={{ paddingBottom: 100 }}>
       {/* Header */}
@@ -181,7 +187,7 @@ const POST = () => {
         </Text>
         <View className="w-6" />
       </View>
-  
+
       {/* User Info */}
       <View className="flex-row items-center mb-5">
         <Image source={{ uri: avatarUri }} className="w-12 h-12 rounded-full" />
@@ -190,7 +196,7 @@ const POST = () => {
           <Text className="text-xs text-gray-500">{today}</Text>
         </View>
       </View>
-  
+
       {/* Category */}
       <View className="mb-3">
         <Text className="font-semibold mb-1 text-base text-gray-700">Phương pháp chế biến</Text>
@@ -206,7 +212,7 @@ const POST = () => {
           </Text>
           <Ionicons name={showCategoryDropdown ? "chevron-up" : "chevron-down"} size={20} color="#666" />
         </TouchableOpacity>
-  
+
         {showCategoryDropdown && (
           <View className="bg-white rounded-lg py-2 mb-3 shadow max-h-52">
             <ScrollView nestedScrollEnabled className="max-h-52">
@@ -225,7 +231,7 @@ const POST = () => {
             </ScrollView>
           </View>
         )}
-  
+
         {/* Inputs */}
         <Text className="font-semibold mb-1 text-base text-gray-700">Tiêu đề</Text>
         <TextInput
@@ -234,7 +240,7 @@ const POST = () => {
           onChangeText={setTitle}
           className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow"
         />
-  
+
         <Text className="font-semibold mb-1 text-base text-gray-700">Mô tả</Text>
         <TextInput
           placeholder="Giới thiệu ngắn về món ăn"
@@ -243,7 +249,7 @@ const POST = () => {
           multiline
           className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-16"
         />
-  
+
         <Text className="font-semibold mb-1 text-base text-gray-700">Nguyên liệu</Text>
         <TextInput
           placeholder="Liệt kê nguyên liệu"
@@ -252,7 +258,7 @@ const POST = () => {
           multiline
           className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-20"
         />
-  
+
         <Text className="font-semibold mb-1 text-base text-gray-700">Công thức chi tiết</Text>
         <TextInput
           placeholder="Các bước chế biến"
@@ -261,8 +267,16 @@ const POST = () => {
           multiline
           className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-32"
         />
+
+        <Text className="font-semibold mb-1 text-base text-gray-700">Thời gian nấu</Text>
+        <TextInput
+          placeholder="VD: 30 phút, 1 giờ..."
+          value={duration}
+          onChangeText={setDuration}
+          className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow"
+        />
       </View>
-  
+
       {/* Images Preview */}
       <View className="flex-col gap-2 mb-3">
         {selectedImages.map((img, idx) => (
@@ -281,13 +295,13 @@ const POST = () => {
           </View>
         ))}
       </View>
-  
+
       {/* Pick Image */}
       <TouchableOpacity className="flex-row items-center mb-6 px-3" onPress={pickImages}>
         <Feather name="image" size={20} color="#0B9A61" />
         <Text className="text-500 text-base ml-2 font-medium text-[#0B9A61]">Chọn một hoặc nhiều ảnh</Text>
       </TouchableOpacity>
-  
+
       {/* Submit Button */}
       <TouchableOpacity
         className={`py-4 rounded-xl items-center shadow-md ${isSubmitting ? "bg-gray-400" : "bg-[#0B9A61]"}`}
@@ -303,7 +317,7 @@ const POST = () => {
         )}
       </TouchableOpacity>
     </ScrollView>
-  );  
+  );
 };
 
 export default POST;

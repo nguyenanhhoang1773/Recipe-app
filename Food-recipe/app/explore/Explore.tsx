@@ -28,6 +28,7 @@ type Post = {
   image: string;
   type: string;
   author: string;
+  userAvatar?: string;
   createdAt?: string;
 
   instructions?: string;
@@ -46,8 +47,18 @@ const Explore = () => {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userAvatar, setUserAvatar] = useState<string>("");
 
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
+
+  const fetchUserAvatar = async () => {
+    try {
+      const res = await axios.post(`${hostId}:80/api/getUser`, { id_user: user?.id });
+      setUserAvatar(res.data?.image_url || "");
+    } catch (error) {
+      console.error("Lỗi khi lấy avatar người dùng:", error);
+    }
+  };
 
   const fetchPosts = async () => {
     if (!user?.id) return;
@@ -56,13 +67,24 @@ const Explore = () => {
       const res = await axios.post(`${hostId}:80/api/getMyRecipes`, {
         id_user: user.id,
       });
-      setPosts(res.data);
+      setPosts(
+        res.data.map((post: Post) => ({
+          ...post,
+          userAvatar: userAvatar || post.image,
+        }))
+      );
     } catch (error) {
       console.error("Lỗi khi tải công thức cá nhân:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isFocused && user?.id) {
+      fetchUserAvatar().then(fetchPosts);
+    }
+  }, [user, isFocused]);
 
   const handleDeletePost = async (postId: string) => {
     Alert.alert("Xác nhận", "Bạn có chắc muốn xóa công thức này?", [
@@ -84,14 +106,10 @@ const Explore = () => {
     ]);
   };
 
-  useEffect(() => {
-    if (isFocused) fetchPosts();
-  }, [user, isFocused]);
-
   const renderPostItem = ({ item }: { item: Post }) => (
     <PostCard
       displayName={item.author}
-      avatar={item.image}
+      avatar={item.userAvatar || item.image}
       name={item.title}
       description={item.description}
       instructions={item.formula}

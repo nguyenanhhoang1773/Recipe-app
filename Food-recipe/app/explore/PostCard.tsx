@@ -79,11 +79,24 @@ const PostCard = ({
       )}
 
       {list_images?.length > 0 && (
-        <Image
-          source={{ uri: list_images[0] }}
-          className="w-full h-72 rounded-lg"
-          resizeMode="cover"
-        />
+        list_images.length > 1 ? (
+          <Swiper style={{ height: 300 }} showsPagination autoplay>
+            {list_images.map((img, index) => (
+              <Image
+                key={index}
+                source={{ uri: img }}
+                className="w-full h-72 rounded-lg"
+                resizeMode="cover"
+              />
+            ))}
+          </Swiper>
+        ) : (
+          <Image
+            source={{ uri: list_images[0] }}
+            className="w-full h-72 rounded-lg"
+            resizeMode="cover"
+          />
+        )
       )}
 
       <Text className="text-lg font-bold mt-3">{name}</Text>
