@@ -78,25 +78,13 @@ const PostCard = ({
         </View>
       )}
 
-      {list_images?.length > 0 &&
-        (list_images.length > 1 ? (
-          <Swiper style={{ height: 300 }} showsPagination autoplay>
-            {list_images.map((img, index) => (
-              <Image
-                key={index}
-                source={{ uri: img }}
-                className="w-full h-72 rounded-lg"
-                resizeMode="cover"
-              />
-            ))}
-          </Swiper>
-        ) : (
-          <Image
-            source={{ uri: list_images[0] }}
-            className="w-full h-72 rounded-lg"
-            resizeMode="cover"
-          />
-        ))}
+      {list_images?.length > 0 && (
+        <Image
+          source={{ uri: list_images[0] }}
+          className="w-full h-72 rounded-lg"
+          resizeMode="cover"
+        />
+      )}
 
       <Text className="text-lg font-bold mt-3">{name}</Text>
       <Text className="text-sm text-gray-700 mt-1">{description}</Text>
@@ -123,10 +111,6 @@ const PostCard = ({
       )}
 
       <View className="flex-row items-center mt-3 space-x-5">
-        <View className="flex-row items-center space-x-2">
-          <Ionicons name="heart-outline" size={24} color="black" />
-          <Text className="text-base">10</Text>
-        </View>
         <View className="flex-row items-center space-x-2">
           <Ionicons name="chatbubble-outline" size={24} color="black" />
           <Text className="text-base">10</Text>

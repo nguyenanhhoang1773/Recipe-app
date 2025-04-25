@@ -21,14 +21,17 @@ type RootStackParamList = {
 
 type Post = {
   _id: string;
-  userName: string;
-  userAvatar: string;
-  name: string;
+  title: string;
   description: string;
-  instructions: string;
-  list_images: string[];
+  ingredients: string;
+  formula: string;
+  image: string;
   type: string;
-  createdAt: string;
+  author: string;
+  createdAt?: string;
+
+  instructions?: string;
+  list_images?: string[];
 };
 
 type ExploreScreenNavigationProp = NativeStackNavigationProp<
@@ -47,38 +50,34 @@ const Explore = () => {
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
   const fetchPosts = async () => {
-    if (!user?.id) {
-      console.log("Chưa đăng nhập - không có user.id");
-      return;
-    }
-
+    if (!user?.id) return;
     setLoading(true);
     try {
-      const res = await axios.post(`${hostId}:80/api/getPost`, {
+      const res = await axios.post(`${hostId}:80/api/getMyRecipes`, {
         id_user: user.id,
       });
       setPosts(res.data);
     } catch (error) {
-      console.error("Lỗi khi tải bài viết:", error);
+      console.error("Lỗi khi tải công thức cá nhân:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeletePost = async (postId: string) => {
-    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa bài viết này?", [
+    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa công thức này?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Xóa",
         style: "destructive",
         onPress: async () => {
           try {
-            await axios.delete(`${hostId}:80/api/deletePost`, {
+            await axios.delete(`${hostId}:80/api/deleteRecipe`, {
               data: { id: postId },
             });
             setPosts((prev) => prev.filter((post) => post._id !== postId));
           } catch (error) {
-            console.error("Lỗi khi xóa bài viết:", error);
+            console.error("Lỗi khi xóa công thức:", error);
           }
         },
       },
@@ -91,14 +90,14 @@ const Explore = () => {
 
   const renderPostItem = ({ item }: { item: Post }) => (
     <PostCard
-      displayName={item.userName}
-      avatar={item.userAvatar}
-      name={item.name}
+      displayName={item.author}
+      avatar={item.image}
+      name={item.title}
       description={item.description}
-      instructions={item.instructions}
-      list_images={item.list_images}
+      instructions={item.formula}
+      list_images={[item.image]}
       type={item.type}
-      createdAt={item.createdAt}
+      createdAt={item.createdAt || new Date().toISOString()}
       onDelete={() => handleDeletePost(item._id)}
       onEdit={() =>
         navigation.navigate("POST", {
@@ -129,7 +128,7 @@ const Explore = () => {
         {loading ? (
           <ActivityIndicator size="large" className="mt-8" />
         ) : posts.length === 0 ? (
-          <Text className="text-center mt-10 text-base text-gray-500">Bạn chưa có bài viết nào.</Text>
+          <Text className="text-center mt-10 text-base text-gray-500">Bạn chưa có công thức nào.</Text>
         ) : (
           <FlatList
             data={posts}

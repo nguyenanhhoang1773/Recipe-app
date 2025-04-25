@@ -25,11 +25,11 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 
 type PostType = {
   _id: string;
-  name: string;
+  title: string;
   description: string;
   ingredients: string;
-  instructions: string;
-  list_images: string[];
+  formula: string;
+  image: string;
   type: string;
 };
 
@@ -74,12 +74,12 @@ const POST = () => {
 
   useEffect(() => {
     if (postToEdit) {
-      setTitle(postToEdit.name);
+      setTitle(postToEdit.title);
       setDescription(postToEdit.description);
       setIngredients(postToEdit.ingredients);
-      setInstructions(postToEdit.instructions);
+      setInstructions(postToEdit.formula);
       setSelectedCategory(postToEdit.type);
-      setSelectedImages(postToEdit.list_images || []);
+      setSelectedImages([postToEdit.image]);
     }
   }, [postToEdit]);
 
@@ -130,22 +130,24 @@ const POST = () => {
     }
 
     const postData = {
+      id_recipe: Math.random().toString(36).substring(7),
       id_user: user.id,
-      userName: displayName,
-      userAvatar: user.imageUrl,
-      name: title,
-      description,
-      ingredients,
-      instructions,
-      list_images,
+      title,
+      image: list_images[0] || "",
       type: selectedCategory,
+      duration: "30 phút",
+      author: displayName,
+      number_or_ingredients: ingredients.split(",").length,
+      ingredients,
+      formula: instructions,
+      description,
     };
 
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const url = postToEdit ? `${hostId}:80/api/updatePost` : `${hostId}:80/api/addPost`;
+      const url = postToEdit ? `${hostId}:80/api/updateRecipe` : `${hostId}:80/api/addRecipe`;
       const method = postToEdit ? "PUT" : "POST";
       const response = await fetch(url, {
         method,
@@ -153,8 +155,8 @@ const POST = () => {
         body: JSON.stringify(postToEdit ? { ...postData, id: postToEdit._id } : postData),
       });
       const data = await response.json();
-      if (data.status || data.success || data.post) {
-        Alert.alert("Thành công", postToEdit ? "Bài viết đã được cập nhật!" : "Bài viết đã được đăng!");
+      if (data.status || data.recipe) {
+        Alert.alert("Thành công", postToEdit ? "Công thức đã được cập nhật!" : "Đăng công thức thành công!");
         setTitle("");
         setDescription("");
         setIngredients("");
@@ -169,15 +171,18 @@ const POST = () => {
       setIsSubmitting(false);
     }
   };
-
   return (
-    <ScrollView className="flex-1 p-4 bg-white">
+    <ScrollView className="flex-1 p-4 bg-white" contentContainerStyle={{ paddingBottom: 100 }}>
+      {/* Header */}
       <View className="flex-row items-center justify-between mb-5">
         <Ionicons name="arrow-back" size={24} color="black" onPress={() => navigation.goBack()} />
-        <Text className="text-xl font-bold text-gray-800">{postToEdit ? "Chỉnh sửa bài viết" : "Thêm bài viết"}</Text>
+        <Text className="text-xl font-bold text-gray-800">
+          {postToEdit ? "Chỉnh sửa bài viết" : "Thêm bài viết"}
+        </Text>
         <View className="w-6" />
       </View>
-
+  
+      {/* User Info */}
       <View className="flex-row items-center mb-5">
         <Image source={{ uri: avatarUri }} className="w-12 h-12 rounded-full" />
         <View className="ml-3">
@@ -185,7 +190,8 @@ const POST = () => {
           <Text className="text-xs text-gray-500">{today}</Text>
         </View>
       </View>
-
+  
+      {/* Category */}
       <View className="mb-3">
         <Text className="font-semibold mb-1 text-base text-gray-700">Phương pháp chế biến</Text>
         <TouchableOpacity
@@ -200,10 +206,10 @@ const POST = () => {
           </Text>
           <Ionicons name={showCategoryDropdown ? "chevron-up" : "chevron-down"} size={20} color="#666" />
         </TouchableOpacity>
-
+  
         {showCategoryDropdown && (
           <View className="bg-white rounded-lg py-2 mb-3 shadow max-h-52">
-            <ScrollView nestedScrollEnabled={true} className="max-h-52">
+            <ScrollView nestedScrollEnabled className="max-h-52">
               {categories.map((item) => (
                 <TouchableOpacity
                   key={item._id}
@@ -219,20 +225,45 @@ const POST = () => {
             </ScrollView>
           </View>
         )}
-
+  
+        {/* Inputs */}
         <Text className="font-semibold mb-1 text-base text-gray-700">Tiêu đề</Text>
-        <TextInput placeholder="Tên món ăn" value={title} onChangeText={setTitle} className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow" />
-
+        <TextInput
+          placeholder="Tên món ăn"
+          value={title}
+          onChangeText={setTitle}
+          className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow"
+        />
+  
         <Text className="font-semibold mb-1 text-base text-gray-700">Mô tả</Text>
-        <TextInput placeholder="Giới thiệu ngắn về món ăn" value={description} onChangeText={setDescription} multiline className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-16" />
-
+        <TextInput
+          placeholder="Giới thiệu ngắn về món ăn"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-16"
+        />
+  
         <Text className="font-semibold mb-1 text-base text-gray-700">Nguyên liệu</Text>
-        <TextInput placeholder="Liệt kê nguyên liệu" value={ingredients} onChangeText={setIngredients} multiline className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-20" />
-
+        <TextInput
+          placeholder="Liệt kê nguyên liệu"
+          value={ingredients}
+          onChangeText={setIngredients}
+          multiline
+          className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-20"
+        />
+  
         <Text className="font-semibold mb-1 text-base text-gray-700">Công thức chi tiết</Text>
-        <TextInput placeholder="Các bước chế biến" value={instructions} onChangeText={setInstructions} multiline className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-32" />
+        <TextInput
+          placeholder="Các bước chế biến"
+          value={instructions}
+          onChangeText={setInstructions}
+          multiline
+          className="bg-white rounded-xl px-4 py-3 mb-3 text-base shadow h-32"
+        />
       </View>
-
+  
+      {/* Images Preview */}
       <View className="flex-col gap-2 mb-3">
         {selectedImages.map((img, idx) => (
           <View key={idx} className="relative w-full h-44">
@@ -250,15 +281,19 @@ const POST = () => {
           </View>
         ))}
       </View>
-
+  
+      {/* Pick Image */}
       <TouchableOpacity className="flex-row items-center mb-6 px-3" onPress={pickImages}>
         <Feather name="image" size={20} color="#0B9A61" />
         <Text className="text-500 text-base ml-2 font-medium text-[#0B9A61]">Chọn một hoặc nhiều ảnh</Text>
       </TouchableOpacity>
+  
+      {/* Submit Button */}
       <TouchableOpacity
-        className={`bg-500 py-4 rounded-xl items-center shadow-md 
-                    ${isSubmitting ? "opacity-50" : "bg-[#0B9A61]"}`}
-        onPress={handlePost}>
+        className={`py-4 rounded-xl items-center shadow-md ${isSubmitting ? "bg-gray-400" : "bg-[#0B9A61]"}`}
+        onPress={handlePost}
+        disabled={isSubmitting}
+      >
         {isSubmitting ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
@@ -268,7 +303,7 @@ const POST = () => {
         )}
       </TouchableOpacity>
     </ScrollView>
-  );
+  );  
 };
 
 export default POST;
