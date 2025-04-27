@@ -70,7 +70,7 @@ const searchRecipes = async (req, res) => {
       return res.status(400).json({ message: "Type parameter is required" });
     }
     const recipes = await Recipe.find({
-      title: { $regex: textSearch, $options: "i" },
+      title_normalized: { $regex: textSearch, $options: "i" },
     });
     res.json(recipes);
   } catch (error) {
@@ -99,13 +99,11 @@ const updateRecipe = async (req, res) => {
     const updated = await Recipe.findByIdAndUpdate(id, data, { new: true });
     res.status(200).json({ status: true, recipe: updated });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        status: false,
-        message: "Cập nhật thất bại",
-        error: err.message,
-      });
+    res.status(500).json({
+      status: false,
+      message: "Cập nhật thất bại",
+      error: err.message,
+    });
   }
 };
 
