@@ -21,6 +21,7 @@ type RootStackParamList = {
 
 type Post = {
   _id: string;
+  id_recipe: string;
   title: string;
   description: string;
   ingredients: string;
@@ -33,6 +34,7 @@ type Post = {
 
   instructions?: string;
   list_images?: string[];
+  feedbackCount?: number;
 };
 
 type ExploreScreenNavigationProp = NativeStackNavigationProp<
@@ -48,6 +50,8 @@ const Explore = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [userAvatar, setUserAvatar] = useState<string>("");
+
+  
 
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
@@ -71,6 +75,8 @@ const Explore = () => {
         res.data.map((post: Post) => ({
           ...post,
           userAvatar: userAvatar || post.image,
+          id_recipe: post.id_recipe,
+          feedbackCount: post.feedbackCount || 0,
         }))
       );
     } catch (error) {
@@ -108,6 +114,7 @@ const Explore = () => {
 
   const renderPostItem = ({ item }: { item: Post }) => (
     <PostCard
+      id_recipe={item.id_recipe}
       displayName={item.author}
       avatar={item.userAvatar || item.image}
       name={item.title}
@@ -116,6 +123,7 @@ const Explore = () => {
       list_images={[item.image]}
       type={item.type}
       createdAt={item.createdAt || new Date().toISOString()}
+      feedbackCount={item.feedbackCount || 0}
       onDelete={() => handleDeletePost(item._id)}
       onEdit={() =>
         navigation.navigate("POST", {
@@ -142,7 +150,7 @@ const Explore = () => {
         </TouchableOpacity>
       </View>
 
-      <View className="px-4 mt-4">
+      <View className="flex-1 px-4 mt-4">
         {loading ? (
           <ActivityIndicator size="large" className="mt-8" />
         ) : posts.length === 0 ? (

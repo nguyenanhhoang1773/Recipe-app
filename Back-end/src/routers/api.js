@@ -20,23 +20,11 @@ const searchItems = require("../controllers/Search/Search.js");
 const {
   addRecipe,
   getRecipes,
-  getRecipesWithType,
-  searchRecipes,
-} = require("../controllers/Recipe/Recipe.js");
-//router User
-router.post("/login", login);
-//router Recipes
-router.post("/addRecipe", addRecipe);
-router.get("/getRecipes", getRecipes);
-router.get("/getRecipesWithType", getRecipesWithType);
-router.get("/searchRecipes", searchRecipes);
-
-const {
-  addRecipe,
-  getRecipes,
   updateRecipe,
   getMyRecipes,
   deleteRecipe,
+  getRecipesWithType,
+  searchRecipes
 } = require("../controllers/Recipe/Recipe.js");
 
 // ==== Router User ====
@@ -50,6 +38,8 @@ router.get("/getRecipes", getRecipes);
 router.put("/updateRecipe", updateRecipe);
 router.post("/getMyRecipes", getMyRecipes);
 router.delete("/deleteRecipe", deleteRecipe);
+router.get("/getRecipesWithType", getRecipesWithType);
+router.get("/searchRecipes", searchRecipes);
 
 // ==== Router Category ====
 router.get("/getCategory", getCategory);

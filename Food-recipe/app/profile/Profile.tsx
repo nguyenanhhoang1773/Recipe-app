@@ -81,7 +81,7 @@ const Profile = () => {
 
   const fetchUserPost = async () => {
     try {
-      const res = await axios.post<Post[]>(`${hostId}:80/api/getPost`, {
+      const res = await axios.post<Post[]>(`${hostId}:80/api/getMyRecipes`, {
         id_user: user?.id,
       });
       console.log("Công thức nhận được:", res.data);

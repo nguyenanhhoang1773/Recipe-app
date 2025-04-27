@@ -83,9 +83,9 @@ export default function ItemDetail() {
             style={{ height: (windowHeight * 1) / 4 }}
             // source={images[image as string]}
             source={{
-              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSA7CyXemdfR_qLEor7Y61GmJ6cMRJfNDnrdQ&s",
+              uri: image as string,
             }}
-            className="w-full  rounded-md mb-2"
+            className="w-full rounded-md mb-2"
           />
         </View>
         {isLoading && (
