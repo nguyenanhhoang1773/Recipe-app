@@ -35,7 +35,12 @@ export default function RootLayout() {
       tokenCache={tokenCache}
     >
       <ClerkLoaded>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="search"
+            options={{ animation: "fade_from_bottom" }}
+          />
+        </Stack>
       </ClerkLoaded>
     </ClerkProvider>
   );

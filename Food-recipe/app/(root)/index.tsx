@@ -24,24 +24,16 @@ import { Redirect, router } from "expo-router";
 import axios from "axios";
 import "react-native-get-random-values";
 import { Recipe } from "@/type";
-import { windowHeight, windowWidth } from "@/constant/constant";
+import {
+  convertType,
+  handlePressRecipe,
+  windowHeight,
+  windowWidth,
+} from "@/constant/constant";
 const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 import * as Location from "expo-location";
 
 const Home = () => {
-  const handlePressRecipe = (recipe: Recipe) => {
-    router.push({
-      pathname: "/favorite/itemdetail",
-      params: {
-        id_recipe: 1,
-        name: recipe.title,
-        image: recipe.image,
-        description: recipe.description,
-        ingredients: recipe.ingredients,
-        instructions: recipe.formula,
-      },
-    });
-  };
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -72,7 +64,6 @@ const Home = () => {
         longitude: location.coords.longitude,
       });
       setAddress(address);
-      console.log(address);
     }
     getCurrentLocation();
   }, []);
@@ -154,28 +145,26 @@ const Home = () => {
             </Swiper>
           </View>
           <View className="px-7">
-            <View className=" flex-row items-center justify-center mt-5 bg-[rgba(0,0,0,0.02)] rounded-full">
-              <TouchableOpacity
-                onPress={handlePress}
-                className="p-4"
-              >
-                <AntDesign
-                  size={28}
-                  name="search1"
-                />
-              </TouchableOpacity>
-              <TextInput
-                className="flex-1 py-2 text-lg"
-                placeholder="Tìm kiếm công thức món ngon,..."
-              />
-              <View className="bg-text-primary h-8 w-[1px]"></View>
-              <TouchableOpacity className="p-4">
-                <FontAwesome6
-                  size={20}
-                  name="sliders"
-                />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={() => router.push("/search")}>
+              <View className=" flex-row items-center justify-center mt-5 bg-[rgba(0,0,0,0.02)] rounded-full">
+                <TouchableOpacity className="p-4">
+                  <AntDesign
+                    size={28}
+                    name="search1"
+                  />
+                </TouchableOpacity>
+                <Text className="flex-1 py-2 text-lg text-[rgba(0,0,0,0.3)]">
+                  Tìm kiếm công thức món ngon,...
+                </Text>
+                <View className="bg-text-primary h-8 w-[1px]"></View>
+                <TouchableOpacity className="p-4">
+                  <FontAwesome6
+                    size={20}
+                    name="sliders"
+                  />
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
           </View>
           <View className="px-7 flex-row items-center mt-5">
             <ItemCate
@@ -216,65 +205,68 @@ const Home = () => {
             contentContainerClassName="px-7"
             horizontal
             showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => (
-              <TouchableOpacity
-                onPress={() => handlePressRecipe(item)}
-                style={{
-                  height: windowHeight / 2.5,
-                  width: windowWidth / 1.7,
-                }}
-                className={`${index && "ml-3"} w-full`}
-              >
-                <Image
-                  className="w-full h-full rounded-3xl"
-                  source={images[item.image]}
-                />
-                <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.5)"]}
+            renderItem={({ item, index }) => {
+              const type = convertType(item.type[0]);
+              return (
+                <TouchableOpacity
+                  onPress={() => handlePressRecipe(item)}
                   style={{
-                    position: "absolute",
-                    right: 0,
-                    left: 0,
-                    bottom: 0,
-                    top: "50%",
-                    borderBottomLeftRadius: 24,
-                    borderBottomRightRadius: 24,
+                    height: windowHeight / 2.5,
+                    width: windowWidth / 1.7,
                   }}
-                />
-                <View className="absolute items-center justify-center px-4 py-2 top-4 left-4 bg-[rgba(11,154,97,0.4)] rounded-2xl">
-                  <Text className="font-Inter-Medium text-lg text-white">
-                    {item.type}
-                  </Text>
-                </View>
-                <View className="absolute bottom-4 right-4 left-4 ">
-                  <Text
-                    numberOfLines={1}
-                    className="text-white font-Inter-Medium text-2xl"
-                  >
-                    {item.title}
-                  </Text>
-                  <Text className="text-text-primary text-sm font-Inter-Light">
-                    By {item.author}
-                  </Text>
-                  <View className="flex-row items-center mt-5">
-                    <Image
-                      className="w-5 h-5"
-                      source={images.clock}
-                    />
-                    <Text className="ml-2 text-sm text-white font-Inter-Light">
-                      {item.duration}
-                    </Text>
-                    <Image
-                      className="w-5 h-5 ml-4"
-                      source={images.ingredients}
-                    />
-                    <Text className="ml-2 text-sm text-white font-Inter-Light">
-                      {item.number_of_ingredients} nguyên liệu
+                  className={`${index && "ml-3"} w-full`}
+                >
+                  <Image
+                    className="w-full h-full rounded-3xl"
+                    source={{ uri: item.image }}
+                  />
+                  <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.5)"]}
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      left: 0,
+                      bottom: 0,
+                      top: "50%",
+                      borderBottomLeftRadius: 24,
+                      borderBottomRightRadius: 24,
+                    }}
+                  />
+                  <View className="absolute items-center justify-center px-4 py-2 top-4 left-4 bg-[rgba(11,154,97,0.4)] rounded-2xl">
+                    <Text className="font-Inter-Medium text-lg text-white">
+                      {type}
                     </Text>
                   </View>
-                </View>
-              </TouchableOpacity>
-            )}
+                  <View className="absolute bottom-4 right-4 left-4 ">
+                    <Text
+                      numberOfLines={1}
+                      className="text-white font-Inter-Medium text-2xl"
+                    >
+                      {item.title}
+                    </Text>
+                    <Text className="text-text-primary text-sm font-Inter-Light">
+                      By {item.author}
+                    </Text>
+                    <View className="flex-row items-center mt-5">
+                      <Image
+                        className="w-5 h-5"
+                        source={images.clock}
+                      />
+                      <Text className="ml-2 text-sm text-white font-Inter-Light">
+                        {item.duration}
+                      </Text>
+                      <Image
+                        className="w-5 h-5 ml-4"
+                        source={images.ingredients}
+                      />
+                      <Text className="ml-2 text-sm text-white font-Inter-Light">
+                        {item.number_of_ingredients} nguyên liệu
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
           />
         </ScrollView>
       </View>

@@ -12,7 +12,7 @@ export default function ItemDetail() {
   // Nhận params từ URL
   const { id_recipe, name, image, description, ingredients, instructions } =
     useLocalSearchParams();
-
+  console.log(ingredients);
   return (
     <View className="h-full bg-white">
       <Ionicons

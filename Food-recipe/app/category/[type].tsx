@@ -20,37 +20,50 @@ import { LinearGradient } from "expo-linear-gradient";
 import colors from "@/constant/colors";
 import { Recipe } from "@/type";
 import axios from "axios";
+import { handlePressRecipe } from "@/constant/constant";
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 const Category = () => {
   const { user } = useUser();
   const [recipes, setRecipes] = useState<Array<Recipe>>([]);
+  const params = useLocalSearchParams();
+  // useEffect(() => {
+  //   axios
+  //     .get(`${hostId}:80/api/getRecipes`)
+  //     .then(function (response) {
+  //       setRecipes(response.data);
+  //     })
+  //     .catch(function (error) {
+  //       console.log(error);
+  //     });
+  // }, []);
   useEffect(() => {
     axios
-      .get(`${hostId}:80/api/getRecipes`)
+      .get(`${hostId}:80/api/getRecipesWithType`, {
+        params: {
+          type: params.type,
+        },
+      })
       .then(function (response) {
+        console.log("response.data:", response.data);
         setRecipes(response.data);
       })
       .catch(function (error) {
         console.log(error);
       });
-  }, []);
-  const handlePressRecipe = (recipe: Recipe) => {
+    console.log(params.type);
+  }, [params.type]);
+  const handleShowALl = () => {
     router.push({
-      pathname: "/favorite/itemdetail",
+      pathname: "/showRecipes",
       params: {
-        id_recipe: 1,
-        name: recipe.title,
-        image: recipe.image,
-        description: recipe.description,
-        ingredients: recipe.ingredients,
-        instructions: recipe.formula,
+        type: "all",
       },
     });
   };
   return (
-    <SafeAreaView>
+    <SafeAreaView className="bg-white">
       <ScrollView className="px-7 pt-5">
         <View className="flex-row items-center">
           <View className="flex-1">
@@ -67,31 +80,32 @@ const Category = () => {
           />
         </View>
         <View className="">
-          <View className=" flex-row items-center justify-center mt-5 bg-[rgba(0,0,0,0.02)] rounded-full">
-            <TouchableOpacity className="p-4">
-              <AntDesign
-                size={28}
-                name="search1"
-              />
-            </TouchableOpacity>
-            <TextInput
-              className="flex-1 py-2 text-lg"
-              placeholder="Tìm kiếm công thức món ngon,..."
-            />
-            <View className="bg-text-primary h-8 w-[1px]"></View>
-            <TouchableOpacity className="p-4">
-              <FontAwesome6
-                size={20}
-                name="sliders"
-              />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={() => router.push("/search")}>
+            <View className=" flex-row items-center justify-center mt-5 bg-[rgba(0,0,0,0.02)] rounded-full">
+              <TouchableOpacity className="p-4">
+                <AntDesign
+                  size={28}
+                  name="search1"
+                />
+              </TouchableOpacity>
+              <Text className="flex-1 py-2 text-lg text-[rgba(0,0,0,0.3)]">
+                Tìm kiếm công thức món ngon,...
+              </Text>
+              <View className="bg-text-primary h-8 w-[1px]"></View>
+              <TouchableOpacity className="p-4">
+                <FontAwesome6
+                  size={20}
+                  name="sliders"
+                />
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <View className="flex-row justify-between items-center mt-5">
           <Text className=" text-2xl font-Inter-Bold">Danh mục</Text>
           <Text className="text-primary text-xl font-Inter-SemiBold">
-            See all
+            tất cả
           </Text>
         </View>
         <View className=" flex-row items-center mt-2">
@@ -124,9 +138,11 @@ const Category = () => {
         </View>
         <View className="flex-row justify-between items-center mt-5">
           <Text className="text-2xl font-Inter-Bold">Đề xuất cho bạn</Text>
-          <Text className="text-primary text-xl font-Inter-SemiBold">
-            See all
-          </Text>
+          <TouchableOpacity onPress={handleShowALl}>
+            <Text className="text-primary text-xl font-Inter-SemiBold">
+              tất cả
+            </Text>
+          </TouchableOpacity>
         </View>
         <FlatList
           data={recipes}
@@ -144,7 +160,7 @@ const Category = () => {
               >
                 <Image
                   className="w-full h-full rounded-3xl"
-                  source={images[item.image]}
+                  source={{ uri: item.image }}
                 />
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.6)"]}
@@ -192,12 +208,14 @@ const Category = () => {
 
         <View className="flex-row justify-between items-center mt-2">
           <Text className="text-2xl font-Inter-Bold">Món ngon nhất tuần!</Text>v
-          <Text className="text-primary text-xl font-Inter-SemiBold">
-            See all
-          </Text>
+          <TouchableOpacity onPress={handleShowALl}>
+            <Text className="text-primary text-xl font-Inter-SemiBold">
+              tất cả
+            </Text>
+          </TouchableOpacity>
         </View>
         <FlatList
-          data={recipes.reverse()}
+          data={recipes.slice().reverse()}
           className="mt-4 pb-5"
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -213,7 +231,7 @@ const Category = () => {
                 <Image
                   onLoad={() => console.log(item.title)}
                   className="w-full h-full rounded-3xl"
-                  source={images[item.image]}
+                  source={{ uri: item.image }}
                 />
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.6)"]}
