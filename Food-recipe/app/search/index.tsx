@@ -57,10 +57,18 @@ const SearchPage = () => {
         console.log(error);
       });
   };
+  const handleShowALl = () => {
+    router.push({
+      pathname: "/showRecipes",
+      params: {
+        type: "all",
+      },
+    });
+  };
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="px-4">
-        <View className=" flex-row items-center justify-center  bg-[rgba(0,0,0,0.02)] rounded-full">
+        <View className=" flex-row items-center justify-center bg-[rgba(0,0,0,0.02)] rounded-full">
           <TouchableOpacity
             onPress={() =>
               router.push({
@@ -107,9 +115,11 @@ const SearchPage = () => {
           {!textValue && (
             <View className="flex-row justify-between items-center mt-2">
               <Text className="text-2xl font-Inter-SemiBold">Mới đây</Text>
-              <Text className="text-primary text-xl font-Inter-SemiBold">
-                tất cả
-              </Text>
+              <TouchableOpacity onPress={handleShowALl}>
+                <Text className="text-primary text-xl font-Inter-SemiBold">
+                  tất cả
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
           <View className="mt-2">
@@ -154,10 +164,11 @@ const SearchPage = () => {
             <Text className="text-2xl font-Inter-Bold">
               Món ngon bạn có thể sẽ thích!
             </Text>
-            v
-            <Text className="text-primary text-xl font-Inter-SemiBold">
-              tất cả
-            </Text>
+            <TouchableOpacity onPress={handleShowALl}>
+              <Text className="text-primary text-xl font-Inter-SemiBold">
+                tất cả
+              </Text>
+            </TouchableOpacity>
           </View>
           <FlatList
             data={recipes.slice().reverse()}

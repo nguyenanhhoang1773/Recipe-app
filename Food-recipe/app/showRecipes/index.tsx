@@ -48,10 +48,10 @@ const ShowRecipes = () => {
     }
   }, [textSearch]);
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView className="flex-1 bg-slate-900">
       <View className="flex-1 px-[8] ">
         {type !== "all" && (
-          <Text className="px-5 text-2xl font-semibold">
+          <Text className="px-5 text-2xl font-semibold text-white">
             Kết quả với "{textSearch}":
           </Text>
         )}
@@ -93,8 +93,8 @@ const ShowRecipes = () => {
                     left: 0,
                     bottom: 0,
                     top: "30%",
-                    borderBottomLeftRadius: 24,
-                    borderBottomRightRadius: 24,
+                    borderBottomLeftRadius: 21,
+                    borderBottomRightRadius: 21,
                   }}
                 />
                 <View className="absolute bottom-4 right-4 left-4">

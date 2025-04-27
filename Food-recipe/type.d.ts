@@ -9,4 +9,5 @@ export interface Recipe {
   ingredients: string; // Danh sách nguyên liệu
   formula: string; // Các bước nấu ăn
   description: string; // Mô tả món ăn
+  title_normalized: string;
 }

@@ -67,7 +67,7 @@ const Home = () => {
     }
     getCurrentLocation();
   }, []);
-  const handlePress = () => { };
+  const handlePress = () => {};
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -97,8 +97,9 @@ const Home = () => {
                 name="location"
               />
               <Text
-                style={{flexShrink: 1, }}
-                className="font-Inter-Medium text-xl mx-1 ">
+                style={{ flexShrink: 1 }}
+                className="font-Inter-Medium text-xl mx-1 "
+              >
                 {address?.name}
               </Text>
               <Feather
@@ -202,7 +203,7 @@ const Home = () => {
             />
           </View>
           <FlatList
-            data={recipes}
+            data={recipes.slice().reverse()}
             className="mt-5 pb-5"
             contentContainerClassName="px-7"
             horizontal

@@ -124,4 +124,6 @@ module.exports = {
   updateRecipe,
   getMyRecipes,
   deleteRecipe,
+  searchRecipes,
+  getRecipesWithType,
 };
