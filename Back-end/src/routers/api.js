@@ -16,12 +16,19 @@ const {
   addCategory,
 } = require("../controllers/Category/Category.js");
 const searchItems = require("../controllers/Search/Search.js");
-const { addRecipe, getRecipes } = require("../controllers/Recipe/Recipe.js");
+const {
+  addRecipe,
+  getRecipes,
+  getRecipesWithType,
+  searchRecipes,
+} = require("../controllers/Recipe/Recipe.js");
 //router User
 router.post("/login", login);
 //router Recipes
 router.post("/addRecipe", addRecipe);
 router.get("/getRecipes", getRecipes);
+router.get("/getRecipesWithType", getRecipesWithType);
+router.get("/searchRecipes", searchRecipes);
 const {
   getPost,
   addPost,

@@ -43,4 +43,33 @@ const getRecipes = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-module.exports = { addRecipe, getRecipes };
+const getRecipesWithType = async (req, res) => {
+  try {
+    const { type } = req.query; // Lấy type từ query param
+    console.log("type:", type);
+    if (!type) {
+      return res.status(400).json({ message: "Type parameter is required" });
+    }
+    const recipes = await Recipe.find({ type: type });
+    res.json(recipes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+const searchRecipes = async (req, res) => {
+  try {
+    const { textSearch } = req.query; // Lấy type từ query param
+    if (!textSearch) {
+      return res.status(400).json({ message: "Type parameter is required" });
+    }
+    const recipes = await Recipe.find({
+      title: { $regex: textSearch, $options: "i" },
+    });
+    res.json(recipes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+module.exports = { addRecipe, getRecipes, getRecipesWithType, searchRecipes };
