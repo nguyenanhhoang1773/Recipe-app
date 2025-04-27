@@ -76,15 +76,23 @@ const POST = () => {
 
   useEffect(() => {
     if (postToEdit) {
-      setTitle(postToEdit.title);
-      setDescription(postToEdit.description);
-      setIngredients(postToEdit.ingredients);
-      setInstructions(postToEdit.formula);
-      setSelectedCategory(postToEdit.type);
-      setSelectedImages([postToEdit.image]);
-      setDuration(postToEdit.duration);
+      setTitle(postToEdit.title || "");
+      setDescription(postToEdit.description || "");
+  
+      // Kiểm tra xem ingredients có phải là mảng không, nếu không thì gán chuỗi rỗng
+      setIngredients(
+        Array.isArray(postToEdit.ingredients) 
+          ? postToEdit.ingredients.join("\n") 
+          : postToEdit.ingredients || ""
+      );
+      
+      setInstructions(postToEdit.formula || "");
+      setSelectedCategory(postToEdit.type || "");
+      setSelectedImages([postToEdit.image || ""]);
+      setDuration(postToEdit.duration || "");
     }
   }, [postToEdit]);
+  
 
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -123,15 +131,19 @@ const POST = () => {
   const handlePost = async () => {
     if (!title || !description || !ingredients || !instructions || !selectedCategory || !duration)
       return Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường bắt buộc.");
+    
     if (!user?.id) return Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng.");
-
+  
     let list_images: string[] = [];
     if (!postToEdit && selectedImages.length > 0) {
       list_images = await uploadMultipleImages();
     } else {
       list_images = selectedImages;
     }
-
+  
+    // Chuyển chuỗi ingredients thành mảng
+    const ingredientsArray = ingredients.split("\n").map(item => item.trim()).filter(item => item !== "");
+  
     const postData = {
       id_recipe: Math.random().toString(36).substring(7),
       id_user: user.id,
@@ -141,15 +153,15 @@ const POST = () => {
       duration,
       author: displayName,
       userAvatar: userData?.image_url || "",
-      number_or_ingredients: ingredients.split(",").length,
-      ingredients,
+      number_or_ingredients: ingredientsArray.length,
+      ingredients: ingredientsArray,  // Gửi dữ liệu dưới dạng mảng
       formula: instructions,
       description,
     };
-
+  
     if (isSubmitting) return;
     setIsSubmitting(true);
-
+  
     try {
       const url = postToEdit ? `${hostId}:80/api/updateRecipe` : `${hostId}:80/api/addRecipe`;
       const method = postToEdit ? "PUT" : "POST";
@@ -176,6 +188,7 @@ const POST = () => {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <ScrollView className="flex-1 p-4 bg-white" contentContainerStyle={{ paddingBottom: 100 }}>

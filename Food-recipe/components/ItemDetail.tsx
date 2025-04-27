@@ -82,9 +82,9 @@ export default function ItemDetail() {
           <Image
             style={{ height: windowHeight / 3 }}
             source={{
-              uri: image,
+              uri: image as string,
             }}
-            className="w-full mb-2"
+            className="w-full rounded-md mb-2"
           />
         </View>
         {isLoading && (
