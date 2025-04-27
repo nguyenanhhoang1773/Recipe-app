@@ -10,11 +10,7 @@ const PostSchema = new Schema({
   ingredients: { type: String },
   instructions: { type: String },
   list_images: [{ type: String }], 
-  id_category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Category",
-    required: true,
-  },
+  type: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
 

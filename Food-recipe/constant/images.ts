@@ -24,10 +24,12 @@ import banhmi from "@/assets/images/banhmi.jpg";
 import kfcThumbnail from "@/assets/images/kfcThumbnail.jpg";
 import McDonaldThumbnail from "@/assets/images/McDonaldThumbnail.png";
 import chien from "@/assets/images/Chien.jpg";
+import chatbot from "@/assets/images/chatbot.jpg";
 import canhchua from "@/assets/images/canhchua.jpg";
 import chedauxanh from "@/assets/images/chedauxanh.jpg";
 import bonglantrungmuoi from "@/assets/images/bonglantrungmuoi.jpg";
 import miy from "@/assets/images/miy.jpg";
+
 
 const images: Record<string, any> = {
   canhchua,
@@ -60,5 +62,6 @@ const images: Record<string, any> = {
   rau,
   cachua,
   cheese,
+  chatbot
 };
 export default images;

@@ -67,7 +67,7 @@ const Home = () => {
     }
     getCurrentLocation();
   }, []);
-  const handlePress = () => {};
+  const handlePress = () => { };
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -96,7 +96,9 @@ const Home = () => {
                 style={{ marginTop: -2, color: "#f04146" }}
                 name="location"
               />
-              <Text className="font-Inter-Medium text-xl mx-1">
+              <Text
+                style={{flexShrink: 1, }}
+                className="font-Inter-Medium text-xl mx-1 ">
                 {address?.name}
               </Text>
               <Feather

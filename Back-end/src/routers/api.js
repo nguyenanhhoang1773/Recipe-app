@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+// ==== Controllers ====
 const {
   getLiked,
   addLiked,
@@ -29,17 +30,26 @@ router.post("/addRecipe", addRecipe);
 router.get("/getRecipes", getRecipes);
 router.get("/getRecipesWithType", getRecipesWithType);
 router.get("/searchRecipes", searchRecipes);
+
 const {
-  getPost,
-  addPost,
-  deletePost,
-  updatePost,
-} = require("../controllers/Post/Post.js");
+  addRecipe,
+  getRecipes,
+  updateRecipe,
+  getMyRecipes,
+  deleteRecipe,
+} = require("../controllers/Recipe/Recipe.js");
 
 // ==== Router User ====
 router.post("/login", login);
 router.post("/getUser", getUser);
 router.post("/updateUser", updateUser);
+
+// ==== Router Recipe ====
+router.post("/addRecipe", addRecipe);
+router.get("/getRecipes", getRecipes);
+router.put("/updateRecipe", updateRecipe);
+router.post("/getMyRecipes", getMyRecipes);
+router.delete("/deleteRecipe", deleteRecipe);
 
 // ==== Router Category ====
 router.get("/getCategory", getCategory);
@@ -56,11 +66,5 @@ router.post("/addFeedback", addFeedback);
 
 // ==== Router Search ====
 router.post("/search", searchItems);
-
-// ==== Router Post ====
-router.post("/getPost", getPost);
-router.post("/addPost", addPost);
-router.delete("/deletePost", deletePost);
-router.put("/updatePost", updatePost);
 
 module.exports = router;

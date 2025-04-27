@@ -9,7 +9,7 @@ const Liked = new Schema({
     image: { type: String },
     description: { type: String },
     ingredients: { type: String },
-    instructions: { type: String },
+    formula: { type: String },
     createdAt: { type: Date, default: Date.now },
 
 });

@@ -11,7 +11,7 @@ import images from "@/constant/images";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { Modal, TextInput } from "react-native";
 import React, { useLayoutEffect, useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useUser, useClerk } from "@clerk/clerk-expo";
 import * as ImagePicker from "expo-image-picker";
@@ -35,6 +35,7 @@ const Profile = () => {
   const [avatar, setAvatar] = useState<string | null>(user?.imageUrl || null);
   const [modalVisible, setModalVisible] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
+  const isFocused = useIsFocused();
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
   useLayoutEffect(() => {
@@ -91,11 +92,11 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && isFocused) {
       fetchUserData();
       fetchUserPost();
     }
-  }, [user]);
+  }, [user, isFocused]);
 
   const handleSettingsPress = () => {
     Alert.alert(
@@ -309,13 +310,13 @@ const Profile = () => {
         />
         <View className="absolute bottom-0 w-full h-5 bg-gray-100 rounded-t-[32px]" />
         <View className="absolute w-full px-2">
-          <View className="flex-row justify-between items-center px-6 pt-6">
-            <Text className="text-2xl font-semibold">Thông tin cá nhân</Text>
+          <View className="flex-row justify-between items-center p-3">
+            <Text className="text-2xl font-semibold " >Thông tin cá nhân</Text>
             <MaterialIcons
               onPress={handleSettingsPress}
               name="settings"
               size={24}
-              color="black"
+              color="#0B9A61"
             />
           </View>
         </View>
@@ -337,11 +338,7 @@ const Profile = () => {
             {bio || "Chưa có giới thiệu..."}
           </Text>
           <TouchableOpacity onPress={handleAddBio}>
-            <Ionicons
-              name="pencil"
-              size={20}
-              color="gray"
-            />
+            <Ionicons name="pencil" size={20} color="#0B9A61" />
           </TouchableOpacity>
         </View>
       </View>
@@ -352,13 +349,13 @@ const Profile = () => {
           <Text className="text-xl font-semibold">Công thức cá nhân</Text>
           <TouchableOpacity
             className="flex-row"
-            onPress={() => navigation.navigate("Explore")}
+            onPress={() => router.push("../Explore")}
           >
             <Text className="text-green-500">Tất cả</Text>
             <Feather
               name="chevron-right"
               size={20}
-              color="gray"
+              color="#0B9A61"
             />
           </TouchableOpacity>
         </View>
@@ -400,13 +397,13 @@ const Profile = () => {
           <Ionicons
             name="heart-outline"
             size={24}
-            color="#6c63ff"
+            color="#0B9A61"
           />
-          <Text className="flex-1 text-lg text-gray-800 ml-4">Yêu thích</Text>
+          <Text className="flex-1 text-lg text-800 ml-4">Yêu thích</Text>
           <Ionicons
             name="chevron-forward-outline"
             size={20}
-            color="#bbb"
+            color="#0B9A61"
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -417,13 +414,13 @@ const Profile = () => {
           <Ionicons
             name="log-out-outline"
             size={24}
-            color="#6c63ff"
+            color="#0B9A61"
           />
-          <Text className="flex-1 text-lg text-gray-800 ml-4">Đăng xuất</Text>
+          <Text className="flex-1 text-lg text-800 ml-4">Đăng xuất</Text>
           <Ionicons
             name="chevron-forward-outline"
             size={20}
-            color="#bbb"
+            color="#0B9A61"
           />
         </TouchableOpacity>
       </View>

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   Image,
   TouchableOpacity,
 } from "react-native";
@@ -16,10 +15,7 @@ type PostDataProps = {
   description: string;
   instructions: string;
   list_images: string[];
-  id_category?: {
-    _id?: string;
-    type?: string;
-  };
+  type?: string;
   createdAt: string;
   onDelete?: () => void;
   onEdit?: () => void; 
@@ -33,7 +29,7 @@ const PostCard = ({
   instructions,
   list_images,
   createdAt,
-  id_category,
+  type,
   onDelete = () => {},
   onEdit = () => {},
 }: PostDataProps) => {
@@ -47,14 +43,13 @@ const PostCard = ({
   };
 
   return (
-    <View style={styles.container}>
-      {/* Avatar + Tên người đăng + Ngày */}
-      <View style={styles.userInfoWrapper}>
-        <View style={styles.userInfo}>
-          <Image source={{ uri: avatar }} style={styles.avatar} />
-          <View style={styles.nameDate}>
-            <Text style={styles.name}>{displayName}</Text>
-            <Text style={styles.date}>{formatDate(createdAt)}</Text>
+    <View className="p-4 bg-white rounded-lg mt-2 relative shadow">
+      <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center flex-1">
+          <Image source={{ uri: avatar }} className="w-12 h-12 rounded-full" />
+          <View className="ml-3">
+            <Text className="text-base font-bold">{displayName}</Text>
+            <Text className="text-xs text-gray-500">{formatDate(createdAt)}</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => setShowOptions(!showOptions)}>
@@ -62,16 +57,15 @@ const PostCard = ({
         </TouchableOpacity>
       </View>
 
-      {/* Menu tùy chọn */}
       {showOptions && (
-        <View style={styles.menu}>
+        <View className="absolute top-16 right-4 bg-gray-200 rounded-lg p-3 z-10 shadow-md">
           <TouchableOpacity
             onPress={() => {
               setShowOptions(false);
               onEdit(); 
             }}
           >
-            <Text style={styles.menuItem}>Chỉnh sửa</Text>
+            <Text className="py-1 text-base">Chỉnh sửa</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -79,20 +73,19 @@ const PostCard = ({
               onDelete(); 
             }}
           >
-            <Text style={[styles.menuItem, { color: "red" }]}>Xóa</Text>
+            <Text className="py-1 text-base text-red-500">Xóa</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Hình ảnh */}
-      {list_images?.length > 0 &&
-        (list_images.length > 1 ? (
-          <Swiper style={styles.swiper} showsPagination autoplay>
+      {list_images?.length > 0 && (
+        list_images.length > 1 ? (
+          <Swiper style={{ height: 300 }} showsPagination autoplay>
             {list_images.map((img, index) => (
               <Image
                 key={index}
                 source={{ uri: img }}
-                style={styles.img}
+                className="w-full h-72 rounded-lg"
                 resizeMode="cover"
               />
             ))}
@@ -100,48 +93,40 @@ const PostCard = ({
         ) : (
           <Image
             source={{ uri: list_images[0] }}
-            style={styles.img}
+            className="w-full h-72 rounded-lg"
             resizeMode="cover"
           />
-        ))}
+        )
+      )}
 
-      {/* Thông tin món ăn */}
-      <Text style={styles.foodTitle}>{name}</Text>
-      <Text style={styles.description}>{description}</Text>
-      <Text style={styles.category}>
-        <Text style={{ fontWeight: "bold" }}>
-          Phương pháp chế biến: {id_category?.type || "không rõ"}
-        </Text>
+      <Text className="text-lg font-bold mt-3">{name}</Text>
+      <Text className="text-sm text-gray-700 mt-1">{description}</Text>
+      <Text className="text-sm text-gray-600 mt-1 italic">
+        <Text className="font-bold">Phương pháp chế biến: {type || "không rõ"}</Text>
       </Text>
 
       <Text
-        style={styles.instructions}
+        className="text-sm text-gray-700 mt-1"
         numberOfLines={showFullInstructions ? undefined : 1}
       >
-        <Text style={{ fontWeight: "bold", fontSize: 15 }}>Công thức:</Text>
-        {"\n"}
-        {instructions}
+        <Text className="font-bold text-base">Công thức:</Text>
+        {"\n"}{instructions}
       </Text>
 
       {shouldShowToggle && (
         <TouchableOpacity
           onPress={() => setShowFullInstructions(!showFullInstructions)}
         >
-          <Text style={styles.toggleText}>
+          <Text className="text-green-500 text-sm mt-1 font-medium">
             {showFullInstructions ? "Thu gọn" : "Xem thêm"}
           </Text>
         </TouchableOpacity>
       )}
 
-      {/* Like + Comment */}
-      <View style={styles.actions}>
-        <View style={styles.sub}>
-          <Ionicons name="heart-outline" size={24} color="black" />
-          <Text style={styles.actionText}>10</Text>
-        </View>
-        <View style={styles.sub}>
+      <View className="flex-row items-center mt-3 space-x-5">
+        <View className="flex-row items-center space-x-2">
           <Ionicons name="chatbubble-outline" size={24} color="black" />
-          <Text style={styles.actionText}>10</Text>
+          <Text className="text-base">10</Text>
         </View>
       </View>
     </View>
@@ -149,111 +134,3 @@ const PostCard = ({
 };
 
 export default PostCard;
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 15,
-    backgroundColor: "white",
-    borderRadius: 8,
-    marginTop: 10,
-    elevation: 2,
-    position: "relative",
-  },
-  userInfoWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  nameDate: {
-    marginLeft: 10,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  date: {
-    fontSize: 12,
-    color: "gray",
-  },
-  swiper: {
-    height: 300,
-    marginTop: 10,
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  img: {
-    width: "100%",
-    height: 300,
-    borderRadius: 10,
-    resizeMode: "cover",
-  },
-  foodTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 10,
-  },
-  description: {
-    fontSize: 14,
-    color: "#444",
-    marginTop: 4,
-  },
-  instructions: {
-    fontSize: 14,
-    color: "#444",
-    marginTop: 4,
-  },
-  toggleText: {
-    color: "#3498db",
-    fontSize: 14,
-    marginTop: 4,
-    fontWeight: "500",
-  },
-  sub: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-  },
-  actions: {
-    marginTop: 10,
-    flexDirection: "row",
-    gap: 20,
-    alignItems: "center",
-  },
-  actionText: {
-    fontSize: 17,
-  },
-  menu: {
-    position: "absolute",
-    top: 60,
-    right: 15,
-    backgroundColor: "#eee",
-    borderRadius: 8,
-    padding: 10,
-    zIndex: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  menuItem: {
-    paddingVertical: 6,
-    fontSize: 16,
-  },
-  category: {
-    fontSize: 14,
-    color: "#555",
-    marginTop: 4,
-    fontStyle: "italic",
-  },
-});

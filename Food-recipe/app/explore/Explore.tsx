@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  StyleSheet,
   Alert,
 } from "react-native";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
@@ -22,17 +21,18 @@ type RootStackParamList = {
 
 type Post = {
   _id: string;
-  userName: string;
-  userAvatar: string;
-  name: string;
+  title: string;
   description: string;
-  instructions: string;
-  list_images: string[];
-  id_category?: {
-    _id?: string;
-    type?: string;
-  };
-  createdAt: string;
+  ingredients: string;
+  formula: string;
+  image: string;
+  type: string;
+  author: string;
+  userAvatar?: string;
+  createdAt?: string;
+
+  instructions?: string;
+  list_images?: string[];
 };
 
 type ExploreScreenNavigationProp = NativeStackNavigationProp<
@@ -47,128 +47,117 @@ const Explore = () => {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userAvatar, setUserAvatar] = useState<string>("");
 
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
-  const fetchPosts = async () => {
-    if (!user?.id) {
-      console.log("Chưa đăng nhập - không có user.id");
-      return;
+  const fetchUserAvatar = async () => {
+    try {
+      const res = await axios.post(`${hostId}:80/api/getUser`, { id_user: user?.id });
+      setUserAvatar(res.data?.image_url || "");
+    } catch (error) {
+      console.error("Lỗi khi lấy avatar người dùng:", error);
     }
+  };
 
+  const fetchPosts = async () => {
+    if (!user?.id) return;
     setLoading(true);
     try {
-      const res = await axios.post(`${hostId}:80/api/getPost`, {
+      const res = await axios.post(`${hostId}:80/api/getMyRecipes`, {
         id_user: user.id,
       });
-      setPosts(res.data);
+      setPosts(
+        res.data.map((post: Post) => ({
+          ...post,
+          userAvatar: userAvatar || post.image,
+        }))
+      );
     } catch (error) {
-      console.error("Lỗi khi tải bài viết:", error);
+      console.error("Lỗi khi tải công thức cá nhân:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (isFocused && user?.id) {
+      fetchUserAvatar().then(fetchPosts);
+    }
+  }, [user, isFocused]);
+
   const handleDeletePost = async (postId: string) => {
-    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa bài viết này?", [
+    Alert.alert("Xác nhận", "Bạn có chắc muốn xóa công thức này?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Xóa",
         style: "destructive",
         onPress: async () => {
           try {
-            await axios.delete(`${hostId}:80/api/deletePost`, {
+            await axios.delete(`${hostId}:80/api/deleteRecipe`, {
               data: { id: postId },
             });
             setPosts((prev) => prev.filter((post) => post._id !== postId));
           } catch (error) {
-            console.error("Lỗi khi xóa bài viết:", error);
+            console.error("Lỗi khi xóa công thức:", error);
           }
         },
       },
     ]);
   };
 
-  useEffect(() => {
-    if (isFocused) fetchPosts();
-  }, [user, isFocused]);
-
   const renderPostItem = ({ item }: { item: Post }) => (
     <PostCard
-      displayName={item.userName}
-      avatar={item.userAvatar}
-      name={item.name}
+      displayName={item.author}
+      avatar={item.userAvatar || item.image}
+      name={item.title}
       description={item.description}
-      instructions={item.instructions}
-      list_images={item.list_images}
-      id_category={item.id_category}
-      createdAt={item.createdAt}
+      instructions={item.formula}
+      list_images={[item.image]}
+      type={item.type}
+      createdAt={item.createdAt || new Date().toISOString()}
       onDelete={() => handleDeletePost(item._id)}
       onEdit={() =>
         navigation.navigate("POST", {
-          post: item, // truyền dữ liệu để chỉnh sửa
-          onPostSuccess: fetchPosts, // reload lại danh sách sau khi update
+          post: item,
+          onPostSuccess: fetchPosts,
         })
       }
     />
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Công thức của tôi</Text>
+    <View className="flex-1 bg-gray-100">
+      <View className="p-3 flex-row justify-between items-center bg-[#0B9A61]">
+        <Text className="text-white text-2xl font-bold">Công thức của tôi</Text>
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("POST", {
               onPostSuccess: fetchPosts,
             })
           }
+          className="ml-4"
         >
-          <Ionicons name="add-circle-outline" size={28} color="black" />
+          <Ionicons name="add" size={28} color="white" />
         </TouchableOpacity>
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" style={styles.loading} />
-      ) : posts.length === 0 ? (
-        <Text style={styles.noPostText}>Bạn chưa có bài viết nào.</Text>
-      ) : (
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item._id}
-          renderItem={renderPostItem}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+      <View className="px-4 mt-4">
+        {loading ? (
+          <ActivityIndicator size="large" className="mt-8" />
+        ) : posts.length === 0 ? (
+          <Text className="text-center mt-10 text-base text-gray-500">Bạn chưa có công thức nào.</Text>
+        ) : (
+          <FlatList
+            data={posts}
+            keyExtractor={(item) => item._id}
+            renderItem={renderPostItem}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </View>
   );
 };
 
 export default Explore;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#f2f2f2",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  loading: {
-    marginTop: 30,
-  },
-  noPostText: {
-    textAlign: "center",
-    marginTop: 40,
-    fontSize: 16,
-    color: "#666",
-  },
-});

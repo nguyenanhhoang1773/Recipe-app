@@ -19,12 +19,13 @@ const getLiked = async (req, res) => {
 
 const addLiked = async (req, res) => {
     try {
+        console.log(req.body)
         const liked = req.body;
         const id_user = liked.id_user;
         const id_recipe = liked.id_recipe;
         const existingLiked = await Liked.findOne({ id_user, id_recipe });
         if (existingLiked) {
-            return res.json({ message: 'Công thức này trong danh sách món yêu thích', status: false });
+            return res.json({ message: 'Công thức này đã có trong danh sách món yêu thích', status: false });
         } else {
             const newLiked = new Liked(liked);
             await newLiked.save();
