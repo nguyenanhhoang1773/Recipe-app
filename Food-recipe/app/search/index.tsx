@@ -53,7 +53,12 @@ const SearchPage = () => {
         },
       })
       .then(function (response) {
-        setSearchedRecipes(response.data.slice(0, 4));
+        console.log(response.data);
+        if (response.data) {
+          setSearchedRecipes(response.data.slice(0, 4));
+        } else {
+          setSearchedRecipes([]);
+        }
       })
       .catch(function (error) {
         console.log(error);
