@@ -118,13 +118,15 @@ const searchRecipes = async (req, res) => {
         .status(400)
         .json({ message: "Text search parameter is required" });
     }
-
     const recipes = await Recipe.find({
-      title_normalized: { $regex: textSearch, $options: "i" },
+      $or: [
+        { title_normalized: { $regex: textSearch, $options: "i" } },
+        { title: { $regex: textSearch, $options: "i" } },
+      ],
     });
 
     if (recipes.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy công thức nào" });
+      return res.status(200).json(0);
     }
 
     const recipesWithFeedback = await Promise.all(
