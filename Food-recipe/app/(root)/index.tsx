@@ -40,6 +40,7 @@ const Home = () => {
   const [recipes, setRecipes] = useState<Array<Recipe>>([]);
   const [address, setAddress] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  console.log(`${hostId}:80/api/getRecipes`);
   useEffect(() => {
     axios
       .get(`${hostId}:80/api/getRecipes`)

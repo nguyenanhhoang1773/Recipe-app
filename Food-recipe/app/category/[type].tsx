@@ -207,7 +207,7 @@ const Category = () => {
         />
 
         <View className="flex-row justify-between items-center mt-2">
-          <Text className="text-2xl font-Inter-Bold">Món ngon nhất tuần!</Text>v
+          <Text className="text-2xl font-Inter-Bold">Món ngon nhất tuần!</Text>
           <TouchableOpacity onPress={handleShowALl}>
             <Text className="text-primary text-xl font-Inter-SemiBold">
               tất cả
