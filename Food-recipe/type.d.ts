@@ -1,4 +1,5 @@
 export interface Recipe {
+  _id: string;
   id_recipe: string; // Mã công thức
   title: string; // Tiêu đề món ăn
   image: string; // Đường dẫn ảnh (hoặc URL ảnh)

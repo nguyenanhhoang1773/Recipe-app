@@ -21,10 +21,11 @@ const convertType = (type: string) => {
   }
 };
 const handlePressRecipe = (recipe: Recipe) => {
+  console.log("id:", recipe._id);
   router.push({
     pathname: "/favorite/itemdetail",
     params: {
-      id_recipe: 1,
+      id_recipe: recipe._id,
       name: recipe.title,
       image: recipe.image,
       description: recipe.description,
