@@ -17,6 +17,8 @@ import { useUser, useClerk } from "@clerk/clerk-expo";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { router } from "expo-router";
+import { Recipe } from "@/type";
+import { handlePressRecipe } from "@/constant/constant";
 
 type TabParamList = {
   Profile: undefined;
@@ -34,7 +36,7 @@ const Profile = () => {
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<string | null>(user?.imageUrl || null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [recipes, setRecipes] = useState<Array<Recipe>>([]);
   const isFocused = useIsFocused();
   const hostId = process.env.EXPO_PUBLIC_LOCAL_HOST_ID;
 
@@ -46,13 +48,6 @@ const Profile = () => {
     bio?: string;
     image_url?: string;
   }
-
-  type Post = {
-    _id: string;
-    name: string;
-    image: string;
-    description: string;
-  };
 
   const fakeLoadData = (message: string) => {
     setIsLoading(true);
@@ -81,13 +76,18 @@ const Profile = () => {
 
   const fetchUserPost = async () => {
     try {
-      const res = await axios.post<Post[]>(`${hostId}:80/api/getMyRecipes`, {
+      const res = await axios.post(`${hostId}:80/api/getMyRecipes`, {
         id_user: user?.id,
       });
       console.log("Công thức nhận được:", res.data);
-      setPosts(res.data);
-    } catch (error) {
-      console.error("Lỗi khi lấy công thức cá nhân:", error);
+      setRecipes(res.data);
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        console.log("Không có công thức cá nhân nào.");
+        setRecipes([]); 
+      } else {
+        console.error("Lỗi khi lấy công thức cá nhân:", error);
+      }
     }
   };
 
@@ -359,20 +359,20 @@ const Profile = () => {
             />
           </TouchableOpacity>
         </View>
-        {posts.length === 0 ? (
+        {recipes.length === 0 ? (
           <Text className="mt-3 text-gray-500">Bạn chưa có bài viết nào.</Text>
         ) : (
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={posts.slice(0, 3)}
+            data={recipes.slice(0, 3)}
             renderItem={({ item }) => (
-              <TouchableOpacity className="mr-4 mt-3">
+              <TouchableOpacity className="mr-4 mt-3" onPress={() => handlePressRecipe(item)}>
                 <Image
                   className="w-64 h-40 rounded-lg"
                   source={{ uri: item.image }}
                 />
-                <Text className="text-xl font-medium mt-2">{item.name}</Text>
+                <Text className="text-xl font-medium mt-2">{item.title}</Text>
                 <Text
                   className="text-l mb-3 w-[230px]"
                   numberOfLines={1}
@@ -391,7 +391,6 @@ const Profile = () => {
         <TouchableOpacity
           activeOpacity={0.7}
           className="flex-row items-center py-4 border-b border-gray-200"
-          // onPress={() => navigation.navigate("Favorite")}
           onPress={() => router.push("../Favorite")}
         >
           <Ionicons
