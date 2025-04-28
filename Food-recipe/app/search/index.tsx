@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Alert,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -43,6 +44,7 @@ const SearchPage = () => {
   }, [searchedRecipes]);
   const handleChangeText = (text: string) => {
     console.log(text);
+    console.log("textValue:", textValue);
     setTextValue(text);
     axios
       .get(`${hostId}:80/api/searchRecipes`, {
@@ -70,15 +72,19 @@ const SearchPage = () => {
       <View className="px-4">
         <View className=" flex-row items-center justify-center bg-[rgba(0,0,0,0.02)] rounded-full">
           <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: "/showRecipes",
-                params: {
-                  textSearch: textValue,
-                  type: "search",
-                },
-              })
-            }
+            onPress={() => {
+              if (textValue) {
+                router.push({
+                  pathname: "/showRecipes",
+                  params: {
+                    textSearch: textValue,
+                    type: "search",
+                  },
+                });
+              } else {
+                Alert.alert("Bạn chưa nhập gì vào thanh tìm kiếm!");
+              }
+            }}
             className="p-4"
           >
             <AntDesign
@@ -87,15 +93,19 @@ const SearchPage = () => {
             />
           </TouchableOpacity>
           <TextInput
-            onSubmitEditing={() =>
-              router.push({
-                pathname: "/showRecipes",
-                params: {
-                  textSearch: textValue,
-                  type: "search",
-                },
-              })
-            }
+            onSubmitEditing={() => {
+              if (textValue) {
+                router.push({
+                  pathname: "/showRecipes",
+                  params: {
+                    textSearch: textValue,
+                    type: "search",
+                  },
+                });
+              } else {
+                Alert.alert("Bạn chưa nhập gì vào thanh tìm kiếm!");
+              }
+            }}
             value={textValue}
             onChangeText={handleChangeText}
             autoFocus={true}
