@@ -79,8 +79,13 @@ const Explore = () => {
           feedbackCount: post.feedbackCount || 0,
         }))
       );
-    } catch (error) {
-      console.error("Lỗi khi tải công thức cá nhân:", error);
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        console.log("Không có công thức cá nhân nào.");
+        setPosts([]); 
+      } else {
+        console.error("Lỗi khi lấy công thức cá nhân:", error);
+      }
     } finally {
       setLoading(false);
     }

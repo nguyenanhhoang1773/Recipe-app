@@ -81,8 +81,13 @@ const Profile = () => {
       });
       console.log("Công thức nhận được:", res.data);
       setRecipes(res.data);
-    } catch (error) {
-      console.error("Lỗi khi lấy công thức cá nhân:", error);
+    } catch (error: any) {
+      if (error.response && error.response.status === 404) {
+        console.log("Không có công thức cá nhân nào.");
+        setRecipes([]); 
+      } else {
+        console.error("Lỗi khi lấy công thức cá nhân:", error);
+      }
     }
   };
 
