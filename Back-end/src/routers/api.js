@@ -29,8 +29,6 @@ const {
   updateRecipe,
   getMyRecipes,
   deleteRecipe,
-  getRecipesWithType,
-  searchRecipes,
 } = require("../controllers/Recipe/Recipe.js");
 
 // ==== Router User ====

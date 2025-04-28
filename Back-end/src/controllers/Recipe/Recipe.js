@@ -40,7 +40,9 @@ const addRecipe = async (req, res) => {
     await recipe.save();
     res.status(201).json({ status: true, recipe });
   } catch (error) {
-    res.status(500).json({ message: "Thêm công thức thất bại", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Thêm công thức thất bại", error: error.message });
   }
 };
 
@@ -55,7 +57,9 @@ const getRecipes = async (req, res) => {
 
     const recipesWithFeedback = await Promise.all(
       recipes.map(async (recipe) => {
-        const feedbackCount = await Feedback.countDocuments({ id_recipe: recipe.id_recipe });
+        const feedbackCount = await Feedback.countDocuments({
+          id_recipe: recipe.id_recipe,
+        });
         return {
           ...recipe.toObject(),
           feedbackCount,
@@ -81,12 +85,16 @@ const getRecipesWithType = async (req, res) => {
     const recipes = await Recipe.find({ type });
 
     if (recipes.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy công thức nào cho loại này" });
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy công thức nào cho loại này" });
     }
 
     const recipesWithFeedback = await Promise.all(
       recipes.map(async (recipe) => {
-        const feedbackCount = await Feedback.countDocuments({ id_recipe: recipe.id_recipe });
+        const feedbackCount = await Feedback.countDocuments({
+          id_recipe: recipe.id_recipe,
+        });
         return {
           ...recipe.toObject(),
           feedbackCount,
@@ -106,7 +114,9 @@ const searchRecipes = async (req, res) => {
   try {
     const { textSearch } = req.query;
     if (!textSearch) {
-      return res.status(400).json({ message: "Text search parameter is required" });
+      return res
+        .status(400)
+        .json({ message: "Text search parameter is required" });
     }
 
     const recipes = await Recipe.find({
@@ -119,7 +129,9 @@ const searchRecipes = async (req, res) => {
 
     const recipesWithFeedback = await Promise.all(
       recipes.map(async (recipe) => {
-        const feedbackCount = await Feedback.countDocuments({ id_recipe: recipe.id_recipe });
+        const feedbackCount = await Feedback.countDocuments({
+          id_recipe: recipe.id_recipe,
+        });
         return {
           ...recipe.toObject(),
           feedbackCount,
@@ -146,7 +158,9 @@ const getMyRecipes = async (req, res) => {
 
     const recipesWithFeedback = await Promise.all(
       recipes.map(async (recipe) => {
-        const feedbackCount = await Feedback.countDocuments({ id_recipe: recipe.id_recipe });
+        const feedbackCount = await Feedback.countDocuments({
+          id_recipe: recipe.id_recipe,
+        });
         return {
           ...recipe.toObject(),
           feedbackCount,
@@ -156,7 +170,9 @@ const getMyRecipes = async (req, res) => {
 
     res.status(200).json(recipesWithFeedback);
   } catch (err) {
-    res.status(500).json({ message: "Lỗi khi lấy công thức cá nhân", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi lấy công thức cá nhân", error: err.message });
   }
 };
 
@@ -174,15 +190,11 @@ const updateRecipe = async (req, res) => {
     const updated = await Recipe.findByIdAndUpdate(id, data, { new: true });
     res.status(200).json({ status: true, recipe: updated });
   } catch (err) {
-<<<<<<< HEAD
     res.status(500).json({
       status: false,
       message: "Cập nhật thất bại",
       error: err.message,
     });
-=======
-    res.status(500).json({ status: false, message: "Cập nhật thất bại", error: err.message });
->>>>>>> 520b60300e0a62035f7cfbed4fa10e1c966a025f
   }
 };
 
